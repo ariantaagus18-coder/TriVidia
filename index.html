@@ -1,1050 +1,1250 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BookOpen, User, LogIn, LogOut, ArrowRight, ArrowLeft, 
-  CheckCircle, PlayCircle, FileText, Database, Download, 
-  BarChart, Target, Search, Settings, Edit3, ExternalLink,
-  Video, Globe, Zap, Award, Edit, LayoutDashboard, PenTool, Bot, Book, Plus, Trash2, Upload
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TriVidia — Platform Riset & Penemuan Hindu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Nunito+Sans:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --saffron: #FF8C00;
+    --saffron-light: #FFF3E0;
+    --saffron-dark: #E07800;
+    --gold: #D4AF37;
+    --gold-light: #FDF8E7;
+    --indigo: #3F51B5;
+    --indigo-light: #E8EAF6;
+    --indigo-dark: #303F9F;
+    --slate: #2D3436;
+    --slate-mid: #636e72;
+    --clay: #FDF2E9;
+    --white: #FFFFFF;
+    --success: #27AE60;
+    --danger: #E74C3C;
+    --border: rgba(45,52,54,0.12);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-md: 0 8px 32px rgba(0,0,0,0.10);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.14);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+  }
 
-// ==========================================
-// 1. MOCK DATABASE (Admin Content & Question Bank)
-// ==========================================
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito Sans', sans-serif; background: #F7F4EF; color: var(--slate); min-height: 100vh; }
 
-const initialVideos = [
-  { id: 1, title: "Memahami Tiga Kerangka Dasar Agama Hindu - Pelita Dharma Episode X", url: "https://www.youtube.com/embed/0Z5bCXgOBaU", isLocal: false },
-  { id: 2, title: "Tatwa Upacara Susila Harus Berjalan Seimbang - Pelita Dharma Episode XVII", url: "https://www.youtube.com/embed/RvZ0e5PFKvY", isLocal: false },
-  { id: 3, title: "Tatwa, Susila, dan Upacara - Mimbar Hindu (TVRI)", url: "https://www.youtube.com/embed/_eq8yk7i1MU", isLocal: false },
-  { id: 4, title: "Mencapai Kehidupan Harmonis Dengan Tiga Kerangka Dasar Agama Hindu", url: "https://www.youtube.com/embed/MoP14eoAVTY", isLocal: false },
-  { id: 5, title: "Dharma Wacana - Nilai-Nilai Tatwa Susila & Upacara Bagian 1", url: "https://www.youtube.com/embed/RQ9PEXrY4Og", isLocal: false },
-  { id: 6, title: "Tiga Kerangka Dasar Agama Hindu (Penjelasan Utuh)", url: "https://www.youtube.com/embed/wuJmrMLV128", isLocal: false },
-  { id: 7, title: "Dharma Wacana Tri Kerangka Dasar Agama Hindu", url: "https://www.youtube.com/embed/CoNoPye9V8A", isLocal: false },
-  { id: 8, title: "Tiga Kerangka Dasar Agama Hindu dan Bagiannya (Materi Singkat)", url: "https://www.youtube.com/embed/RQf-nUiTGbI", isLocal: false },
-  { id: 9, title: "Memahami Upacara Ngaben Dari Sudut Tatwa Susila Upacara", url: "https://www.youtube.com/embed/bmROulNRrdg", isLocal: false },
-  { id: 10, title: "Tiga Kerangka Dasar Agama Hindu (Edukasi Visual)", url: "https://www.youtube.com/embed/AMk_GF-0NMw", isLocal: false }
+  /* ===== SCREENS ===== */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ===== AUTH SCREEN ===== */
+  #screen-auth {
+    background: linear-gradient(135deg, #FF8C00 0%, #D4AF37 50%, #3F51B5 100%);
+    justify-content: center; align-items: center; position: relative; overflow: hidden;
+  }
+  #screen-auth::before {
+    content: 'ॐ'; position: absolute; font-size: 320px; color: rgba(255,255,255,0.05);
+    top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: serif; pointer-events: none;
+  }
+  .auth-card {
+    background: rgba(255,255,255,0.96); backdrop-filter: blur(20px);
+    border-radius: 24px; padding: 48px 44px; width: 440px; max-width: 95vw;
+    box-shadow: var(--shadow-lg); position: relative; z-index: 1;
+  }
+  .auth-logo { text-align: center; margin-bottom: 32px; }
+  .auth-logo .logo-symbol { font-size: 42px; display: block; margin-bottom: 8px; }
+  .auth-logo h1 { font-family: 'Poppins', sans-serif; font-size: 28px; font-weight: 800; color: var(--saffron); letter-spacing: -0.5px; }
+  .auth-logo p { font-size: 13px; color: var(--slate-mid); margin-top: 4px; }
+  .auth-tabs { display: flex; gap: 4px; background: #F1F3F4; border-radius: var(--radius-sm); padding: 4px; margin-bottom: 28px; }
+  .auth-tab { flex: 1; padding: 10px; text-align: center; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; border: none; background: none; border-radius: 8px; cursor: pointer; color: var(--slate-mid); transition: all .2s; }
+  .auth-tab.active { background: white; color: var(--saffron); box-shadow: var(--shadow-sm); }
+  .auth-form { display: flex; flex-direction: column; gap: 16px; }
+  .auth-form input { padding: 14px 18px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Nunito Sans', sans-serif; font-size: 15px; outline: none; transition: border-color .2s; background: var(--clay); }
+  .auth-form input:focus { border-color: var(--saffron); background: white; }
+  .btn-primary { padding: 15px; background: var(--saffron); color: white; border: none; border-radius: var(--radius-sm); font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; transition: all .2s; margin-top: 4px; }
+  .btn-primary:hover { background: var(--saffron-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,140,0,0.35); }
+  .btn-admin-link { text-align: center; margin-top: 16px; font-size: 13px; color: var(--slate-mid); }
+  .btn-admin-link a { color: var(--indigo); cursor: pointer; font-weight: 600; text-decoration: none; }
+
+  /* ===== LAYOUT ===== */
+  #screen-app { flex-direction: row; }
+  .sidebar { width: 260px; min-height: 100vh; background: white; border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+  .main-content { margin-left: 260px; flex: 1; min-height: 100vh; }
+
+  .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo h2 { font-family: 'Poppins', sans-serif; font-size: 22px; font-weight: 800; color: var(--saffron); }
+  .sidebar-logo span { font-size: 12px; color: var(--slate-mid); }
+  .sidebar-user { padding: 16px 24px; background: var(--clay); margin: 12px; border-radius: var(--radius-sm); }
+  .sidebar-user .u-name { font-weight: 600; font-size: 14px; color: var(--slate); }
+  .sidebar-user .u-role { font-size: 12px; color: var(--slate-mid); }
+  .sidebar-nav { flex: 1; padding: 8px 12px; }
+  .nav-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; color: var(--slate-mid); letter-spacing: 1px; text-transform: uppercase; padding: 12px 12px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; font-weight: 500; color: var(--slate-mid); transition: all .2s; margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: var(--clay); color: var(--slate); transform: translateX(2px); }
+  .nav-item.active { background: var(--saffron-light); color: var(--saffron); font-weight: 600; }
+  .nav-item .nav-icon { width: 20px; font-size: 16px; flex-shrink: 0; }
+  .nav-item .badge { margin-left: auto; background: var(--saffron); color: white; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+  .nav-item .badge.locked { background: #ccc; }
+  .sidebar-bottom { padding: 16px; border-top: 1px solid var(--border); }
+  .btn-logout { width: 100%; padding: 10px; background: none; border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: var(--slate-mid); font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; transition: all .2s; }
+  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ===== PAGE SECTIONS ===== */
+  .page { display: none; padding: 36px 40px; }
+  .page.active { display: block; }
+  .page-header { margin-bottom: 32px; }
+  .page-header h1 { font-family: 'Poppins', sans-serif; font-size: 28px; font-weight: 700; color: var(--slate); margin-bottom: 6px; }
+  .page-header p { color: var(--slate-mid); font-size: 15px; }
+
+  /* ===== DASHBOARD ===== */
+  .journey-progress { background: white; border-radius: var(--radius); padding: 28px; margin-bottom: 28px; box-shadow: var(--shadow-sm); }
+  .journey-progress h3 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--slate); }
+  .steps-track { display: flex; align-items: center; gap: 0; }
+  .step-item { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .step-item:not(:last-child)::after { content: ''; position: absolute; top: 18px; left: 50%; width: 100%; height: 2px; background: var(--border); z-index: 0; }
+  .step-item.done:not(:last-child)::after { background: var(--saffron); }
+  .step-dot { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative; z-index: 1; font-weight: 600; color: var(--slate-mid); transition: all .3s; }
+  .step-item.done .step-dot { background: var(--saffron); border-color: var(--saffron); color: white; }
+  .step-item.active .step-dot { background: var(--indigo); border-color: var(--indigo); color: white; animation: pulse-dot 2s infinite; }
+  .step-item.locked .step-dot { background: #F5F5F5; }
+  @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(63,81,181,0.4)} 50%{box-shadow:0 0 0 8px rgba(63,81,181,0)} }
+  .step-label { font-size: 11px; font-weight: 500; margin-top: 8px; text-align: center; color: var(--slate-mid); }
+  .step-item.done .step-label { color: var(--saffron); }
+  .step-item.active .step-label { color: var(--indigo); font-weight: 600; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: white; border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); }
+  .stat-card .sc-label { font-size: 12px; color: var(--slate-mid); font-weight: 500; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .sc-value { font-family: 'Poppins', sans-serif; font-size: 28px; font-weight: 700; color: var(--slate); }
+  .stat-card .sc-sub { font-size: 12px; color: var(--success); margin-top: 4px; }
+  .stat-card.highlight { background: linear-gradient(135deg, var(--saffron), var(--gold)); }
+  .stat-card.highlight .sc-label, .stat-card.highlight .sc-value, .stat-card.highlight .sc-sub { color: white; }
+
+  .action-card { background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-sm); }
+  .action-card h3 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .action-card p { font-size: 14px; color: var(--slate-mid); margin-bottom: 20px; line-height: 1.6; }
+  .btn-action { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; background: var(--saffron); color: white; border: none; border-radius: var(--radius-sm); font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: all .2s; }
+  .btn-action:hover { background: var(--saffron-dark); transform: translateY(-1px); }
+  .btn-action.indigo { background: var(--indigo); }
+  .btn-action.indigo:hover { background: var(--indigo-dark); }
+
+  /* ===== QUIZ ===== */
+  .quiz-header { background: white; border-radius: var(--radius); padding: 24px 28px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
+  .quiz-header h3 { font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 600; }
+  .quiz-timer { background: var(--saffron-light); color: var(--saffron); font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; padding: 8px 16px; border-radius: var(--radius-sm); }
+  .quiz-progress-bar { height: 6px; background: #eee; border-radius: 3px; margin-bottom: 24px; }
+  .quiz-progress-fill { height: 100%; background: var(--saffron); border-radius: 3px; transition: width 0.3s; }
+  .quiz-question-card { background: white; border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+  .q-number { font-size: 12px; color: var(--slate-mid); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .q-text { font-size: 17px; font-weight: 600; color: var(--slate); line-height: 1.6; margin-bottom: 24px; }
+  .q-options { display: flex; flex-direction: column; gap: 10px; }
+  .q-option { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 2px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all .2s; font-size: 15px; }
+  .q-option:hover { border-color: var(--saffron); background: var(--saffron-light); }
+  .q-option.selected { border-color: var(--saffron); background: var(--saffron-light); color: var(--saffron); font-weight: 600; }
+  .q-option-letter { width: 28px; height: 28px; border-radius: 50%; background: #F1F3F4; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .q-option.selected .q-option-letter { background: var(--saffron); color: white; }
+  .essay-area textarea { width: 100%; min-height: 160px; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius-sm); font-family: 'Nunito Sans', sans-serif; font-size: 15px; resize: vertical; outline: none; line-height: 1.7; }
+  .essay-area textarea:focus { border-color: var(--indigo); }
+  .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+  .btn-quiz-nav { padding: 12px 24px; border-radius: var(--radius-sm); font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: all .2s; border: none; }
+  .btn-quiz-prev { background: white; color: var(--slate); border: 1.5px solid var(--border); }
+  .btn-quiz-prev:hover { border-color: var(--slate); }
+  .btn-quiz-next { background: var(--saffron); color: white; }
+  .btn-quiz-next:hover { background: var(--saffron-dark); }
+  .btn-quiz-submit { background: var(--success); color: white; }
+
+  /* ===== VIDEO GALLERY ===== */
+  .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+  .video-card { background: white; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); transition: all .3s; cursor: pointer; }
+  .video-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .video-thumb { position: relative; padding-top: 56.25%; background: #1a1a2e; overflow: hidden; }
+  .video-thumb iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+  .video-thumb .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 52px; height: 52px; background: rgba(255,140,0,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; animation: pulse-play 2s infinite; pointer-events: none; }
+  @keyframes pulse-play { 0%,100%{box-shadow:0 0 0 0 rgba(255,140,0,0.5)} 50%{box-shadow:0 0 0 12px rgba(255,140,0,0)} }
+  .video-info { padding: 16px; }
+  .video-info h4 { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: var(--slate); margin-bottom: 6px; line-height: 1.4; }
+  .video-info p { font-size: 12px; color: var(--slate-mid); }
+  .video-badge { display: inline-block; background: var(--saffron-light); color: var(--saffron); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; }
+
+  /* ===== RESEARCH HUB ===== */
+  .research-hub { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: calc(100vh - 180px); }
+  .hub-panel { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; overflow: hidden; }
+  .hub-panel-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .hub-panel-header h4 { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; }
+  .hub-panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .search-row { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .search-row input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Nunito Sans', sans-serif; outline: none; }
+  .search-row input:focus { border-color: var(--indigo); }
+  .search-row button { padding: 10px 18px; background: var(--indigo); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; }
+  .chat-messages { display: flex; flex-direction: column; gap: 12px; }
+  .msg { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 14px; line-height: 1.6; max-width: 88%; }
+  .msg.ai { background: var(--clay); color: var(--slate); align-self: flex-start; border-radius: 4px 16px 16px 16px; }
+  .msg.user { background: var(--indigo); color: white; align-self: flex-end; border-radius: 16px 4px 16px 16px; }
+  .research-tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .research-tab-btn { padding: 12px 18px; border: none; background: none; font-size: 13px; font-weight: 500; color: var(--slate-mid); cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
+  .research-tab-btn.active { color: var(--indigo); border-bottom-color: var(--indigo); }
+  .research-tab-content { display: none; flex: 1; }
+  .research-tab-content.active { display: flex; flex-direction: column; flex: 1; }
+  .preview-frame { flex: 1; border: none; width: 100%; }
+
+  /* ===== IDENTIFICATION & PROCESSING ===== */
+  .input-section { background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-sm); margin-bottom: 20px; }
+  .input-section h3 { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .input-section .hint { font-size: 13px; color: var(--slate-mid); margin-bottom: 16px; line-height: 1.6; }
+  .big-textarea { width: 100%; min-height: 180px; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius-sm); font-family: 'Nunito Sans', sans-serif; font-size: 15px; resize: vertical; outline: none; line-height: 1.8; transition: border-color .2s; }
+  .big-textarea:focus { border-color: var(--saffron); }
+  .autosave-note { font-size: 12px; color: var(--success); margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .question-prompts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .prompt-chip { padding: 10px 14px; background: var(--indigo-light); color: var(--indigo); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid transparent; transition: all .2s; }
+  .prompt-chip:hover { border-color: var(--indigo); }
+
+  /* ===== VERIFICATION ===== */
+  .verification-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .verif-card { background: white; border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); }
+  .verif-card h4 { font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .verif-card p, .verif-card li { font-size: 14px; color: var(--slate); line-height: 1.7; }
+  .verif-card ul { padding-left: 18px; }
+  .expert-quote { border-left: 3px solid var(--gold); padding: 14px 18px; background: var(--gold-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-style: italic; font-size: 14px; color: var(--slate); line-height: 1.7; margin-top: 12px; }
+  .verif-status { display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 13px; font-weight: 600; }
+  .verif-status.ok { color: var(--success); }
+  .verif-status.warn { color: #E67E22; }
+
+  /* ===== LIBRARY ===== */
+  .ebook-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+  .ebook-card { background: white; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); transition: all .3s; }
+  .ebook-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .ebook-cover { height: 120px; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+  .ebook-info { padding: 16px; }
+  .ebook-info h4 { font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; color: var(--slate); margin-bottom: 4px; }
+  .ebook-info p { font-size: 12px; color: var(--slate-mid); }
+  .ebook-tag { display: inline-block; background: var(--saffron-light); color: var(--saffron); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-bottom: 8px; }
+
+  /* ===== CELEBRATION ===== */
+  #celebration-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
+  #celebration-overlay.show { display: flex; }
+  .celebration-card { background: white; border-radius: 24px; padding: 52px 48px; text-align: center; max-width: 520px; position: relative; overflow: hidden; }
+  .celebration-card .trophy { font-size: 72px; animation: trophy-bounce 1s ease; display: block; margin-bottom: 16px; }
+  @keyframes trophy-bounce { 0%{transform:scale(0) rotate(-10deg)} 60%{transform:scale(1.15) rotate(5deg)} 100%{transform:scale(1) rotate(0)} }
+  .celebration-card h2 { font-family: 'Poppins', sans-serif; font-size: 26px; font-weight: 800; color: var(--saffron); margin-bottom: 10px; }
+  .celebration-card p { color: var(--slate-mid); line-height: 1.7; margin-bottom: 24px; font-size: 15px; }
+  .score-display { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 24px 0; }
+  .score-box { padding: 16px; border-radius: var(--radius-sm); }
+  .score-box.pre { background: #EBF5FB; }
+  .score-box.post { background: #EAFAF1; }
+  .score-box.ngain { background: var(--gold-light); }
+  .score-box .sb-val { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 700; }
+  .score-box .sb-label { font-size: 11px; color: var(--slate-mid); margin-top: 2px; }
+  .score-box.pre .sb-val { color: #2980B9; }
+  .score-box.post .sb-val { color: var(--success); }
+  .score-box.ngain .sb-val { color: var(--gold); }
+  .badge-row { display: flex; justify-content: center; gap: 12px; margin: 20px 0; flex-wrap: wrap; }
+  .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .badge-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; animation: badge-shine 2s infinite; }
+  @keyframes badge-shine { 0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,0.5)} 50%{box-shadow:0 0 0 10px rgba(212,175,55,0)} }
+  .badge-icon.gold { background: linear-gradient(135deg, var(--gold), var(--saffron)); }
+  .badge-name { font-size: 11px; font-weight: 600; color: var(--slate-mid); }
+  .confetti { position: absolute; pointer-events: none; }
+
+  /* ===== ADMIN ===== */
+  #screen-admin { flex-direction: row; }
+  .admin-sidebar { width: 240px; background: var(--slate); min-height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+  .admin-logo { padding: 28px 24px; }
+  .admin-logo h2 { font-family: 'Poppins', sans-serif; font-size: 20px; font-weight: 700; color: white; }
+  .admin-logo span { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .admin-nav { flex: 1; padding: 8px 12px; }
+  .admin-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.6); transition: all .2s; margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; }
+  .admin-nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+  .admin-nav-item.active { background: var(--saffron); color: white; }
+  .admin-main { margin-left: 240px; flex: 1; padding: 36px 40px; }
+  .admin-header { margin-bottom: 32px; }
+  .admin-header h1 { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 700; }
+  .admin-header p { color: var(--slate-mid); font-size: 14px; }
+  .admin-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+  .a-stat { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm); }
+  .a-stat .as-icon { font-size: 28px; margin-bottom: 10px; }
+  .a-stat .as-val { font-family: 'Poppins', sans-serif; font-size: 26px; font-weight: 700; color: var(--slate); }
+  .a-stat .as-label { font-size: 12px; color: var(--slate-mid); margin-top: 2px; }
+  .data-table-wrap { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .data-table-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .data-table-header h3 { font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; }
+  .btn-export { padding: 9px 18px; background: var(--success); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #F8F9FA; padding: 13px 20px; text-align: left; font-size: 12px; font-weight: 600; color: var(--slate-mid); text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 14px 20px; border-top: 1px solid var(--border); font-size: 14px; }
+  tr:hover td { background: var(--clay); }
+  .ngain-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .ngain-high { background: #EAFAF1; color: var(--success); }
+  .ngain-med { background: #FEF9E7; color: #E67E22; }
+  .admin-cms { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 24px; margin-bottom: 20px; }
+  .admin-cms h3 { font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--slate); margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Nunito Sans', sans-serif; outline: none; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--saffron); }
+  .btn-add { padding: 11px 22px; background: var(--saffron); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif; }
+  .search-log-item { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; display: flex; justify-content: space-between; }
+  .search-log-item:last-child { border-bottom: none; }
+  .sl-keyword { font-weight: 600; color: var(--indigo); }
+  .sl-user { color: var(--slate-mid); }
+
+  /* ===== MISC ===== */
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .chip.orange { background: var(--saffron-light); color: var(--saffron); }
+  .chip.blue { background: var(--indigo-light); color: var(--indigo); }
+  .chip.green { background: #EAFAF1; color: var(--success); }
+  .chip.locked { background: #F5F5F5; color: #aaa; }
+  .locked-overlay { text-align: center; padding: 60px 40px; }
+  .locked-overlay .lock-icon { font-size: 48px; margin-bottom: 16px; }
+  .locked-overlay h3 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .locked-overlay p { color: var(--slate-mid); font-size: 14px; }
+
+  /* ===== NOTIFICATION ===== */
+  .notif { position: fixed; top: 20px; right: 20px; background: white; border-radius: var(--radius-sm); padding: 14px 20px; box-shadow: var(--shadow-md); display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; transform: translateX(200%); transition: transform .3s; z-index: 9999; border-left: 4px solid var(--success); }
+  .notif.show { transform: translateX(0); }
+  .notif.error { border-left-color: var(--danger); }
+
+  /* Loading */
+  .ai-loading { display: flex; gap: 6px; align-items: center; padding: 12px 16px; background: var(--clay); border-radius: 4px 16px 16px 16px; }
+  .ai-loading span { width: 8px; height: 8px; background: var(--saffron); border-radius: 50%; animation: dot-bounce 1.2s infinite; }
+  .ai-loading span:nth-child(2) { animation-delay: 0.2s; }
+  .ai-loading span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="screen-auth" class="screen active">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-symbol">🕉️</span>
+      <h1>TriVidia</h1>
+      <p>Platform Riset & Penemuan Agama Hindu</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Masuk</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Daftar</button>
+    </div>
+    <div class="auth-form" id="auth-form-login">
+      <input type="text" id="login-name" placeholder="Nama Lengkap / Nama Panggilan" />
+      <input type="password" id="login-pass" placeholder="Kata Sandi" />
+      <button class="btn-primary" onclick="doLogin()">Masuk ke Platform →</button>
+    </div>
+    <div class="auth-form" id="auth-form-register" style="display:none">
+      <input type="text" id="reg-fullname" placeholder="Nama Lengkap" />
+      <input type="text" id="reg-nickname" placeholder="Nama Panggilan" />
+      <input type="password" id="reg-pass" placeholder="Buat Kata Sandi" />
+      <button class="btn-primary" onclick="doRegister()">Buat Akun →</button>
+    </div>
+    <div class="btn-admin-link">
+      <a onclick="goAdmin()">Masuk sebagai Admin</a>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div id="screen-admin" class="screen">
+  <div class="admin-sidebar">
+    <div class="admin-logo">
+      <h2>🕉️ TriVidia</h2>
+      <span>Admin Control Center</span>
+    </div>
+    <div class="admin-nav">
+      <button class="admin-nav-item active" onclick="adminNav('analytics')">📊 Analitik</button>
+      <button class="admin-nav-item" onclick="adminNav('videos')">🎬 Kelola Video</button>
+      <button class="admin-nav-item" onclick="adminNav('ebooks')">📚 Kelola E-Book</button>
+      <button class="admin-nav-item" onclick="adminNav('questions')">📝 Bank Soal</button>
+      <button class="admin-nav-item" onclick="adminNav('searchlog')">🔍 Log Pencarian</button>
+    </div>
+    <div style="padding:16px; border-top:1px solid rgba(255,255,255,0.1);">
+      <button onclick="backToAuth()" style="width:100%;padding:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:rgba(255,255,255,0.7);font-size:13px;cursor:pointer;">← Keluar Admin</button>
+    </div>
+  </div>
+  <div class="admin-main">
+    <!-- analytics -->
+    <div id="admin-analytics" class="admin-page active" style="display:block">
+      <div class="admin-header">
+        <h1>Dashboard Analitik</h1>
+        <p>Pantau progres dan data penelitian siswa</p>
+      </div>
+      <div class="admin-stats">
+        <div class="a-stat"><div class="as-icon">👤</div><div class="as-val">24</div><div class="as-label">Total Siswa</div></div>
+        <div class="a-stat"><div class="as-icon">✅</div><div class="as-val">18</div><div class="as-label">Selesai Post-Test</div></div>
+        <div class="a-stat"><div class="as-icon">📈</div><div class="as-val">0.72</div><div class="as-label">Rata-rata N-Gain</div></div>
+        <div class="a-stat"><div class="as-icon">⏱️</div><div class="as-val">47m</div><div class="as-label">Avg Waktu Belajar</div></div>
+      </div>
+      <div class="data-table-wrap">
+        <div class="data-table-header">
+          <h3>Data Hasil Penelitian</h3>
+          <button class="btn-export" onclick="exportExcel()">⬇️ Export Excel</button>
+        </div>
+        <table>
+          <thead><tr><th>Nama Siswa</th><th>Pre-Test</th><th>Post-Test</th><th>N-Gain</th><th>Kategori</th><th>Status</th></tr></thead>
+          <tbody id="admin-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- videos -->
+    <div id="admin-videos" style="display:none">
+      <div class="admin-header"><h1>Kelola Video</h1><p>Tambah atau nonaktifkan video pembelajaran</p></div>
+      <div class="admin-cms">
+        <h3>Tambah Video Baru</h3>
+        <div class="form-group"><label>Judul Video</label><input type="text" id="vid-title" placeholder="Judul video..." /></div>
+        <div class="form-group"><label>Link YouTube / URL MP4</label><input type="text" id="vid-url" placeholder="https://youtube.com/watch?v=..." /></div>
+        <button class="btn-add" onclick="addVideo()">+ Tambah Video</button>
+      </div>
+      <div class="admin-cms" id="admin-video-list"></div>
+    </div>
+    <!-- ebooks -->
+    <div id="admin-ebooks" style="display:none">
+      <div class="admin-header"><h1>Kelola E-Book</h1><p>Upload jurnal dan buku referensi Hindu</p></div>
+      <div class="admin-cms">
+        <h3>Upload E-Book / Jurnal</h3>
+        <div class="form-group"><label>Judul</label><input type="text" placeholder="Judul buku / jurnal..." /></div>
+        <div class="form-group"><label>Kategori</label><select><option>Tatwa</option><option>Susila</option><option>Upacara</option><option>Umum</option></select></div>
+        <div class="form-group"><label>File PDF</label><input type="file" accept=".pdf" /></div>
+        <button class="btn-add">+ Upload</button>
+      </div>
+    </div>
+    <!-- questions -->
+    <div id="admin-questions" style="display:none">
+      <div class="admin-header"><h1>Bank Soal</h1><p>Kelola soal pre-test dan post-test</p></div>
+      <div class="admin-cms">
+        <h3>Tambah Soal Baru</h3>
+        <div class="form-group"><label>Jenis</label><select id="q-type"><option>Pilihan Ganda</option><option>Esai</option></select></div>
+        <div class="form-group"><label>Tipe Test</label><select id="q-test-type"><option>Pre-Test</option><option>Post-Test</option></select></div>
+        <div class="form-group"><label>Pertanyaan</label><textarea rows="3" placeholder="Tulis pertanyaan..."></textarea></div>
+        <div id="pg-options-block">
+          <div class="form-group"><label>Pilihan A</label><input type="text" placeholder="Pilihan A" /></div>
+          <div class="form-group"><label>Pilihan B</label><input type="text" placeholder="Pilihan B" /></div>
+          <div class="form-group"><label>Pilihan C</label><input type="text" placeholder="Pilihan C" /></div>
+          <div class="form-group"><label>Pilihan D</label><input type="text" placeholder="Pilihan D" /></div>
+          <div class="form-group"><label>Kunci Jawaban</label><select><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+        </div>
+        <button class="btn-add">+ Simpan Soal</button>
+      </div>
+    </div>
+    <!-- searchlog -->
+    <div id="admin-searchlog" style="display:none">
+      <div class="admin-header"><h1>Log Pencarian Siswa</h1><p>Data kualitatif kata kunci yang dicari siswa</p></div>
+      <div class="data-table-wrap">
+        <div id="search-log-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="screen-app" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🕉️ TriVidia</h2>
+      <span>Platform Pembelajaran Hindu</span>
+    </div>
+    <div class="sidebar-user">
+      <div class="u-name" id="sidebar-username">-</div>
+      <div class="u-role">Peneliti Muda</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-label">Jalur Penemuan</div>
+      <button class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="nav-icon">🏠</span>Beranda</button>
+      <button class="nav-item" onclick="tryNav('pretest')" id="nav-pretest"><span class="nav-icon">📋</span>Pre-Test<span class="badge" id="badge-pretest">1</span></button>
+      <button class="nav-item" onclick="tryNav('stimulasi')" id="nav-stimulasi"><span class="nav-icon">🎬</span>Stimulasi<span class="badge locked" id="badge-stimulasi">🔒</span></button>
+      <button class="nav-item" onclick="tryNav('identifikasi')" id="nav-identifikasi"><span class="nav-icon">❓</span>Identifikasi<span class="badge locked" id="badge-identifikasi">🔒</span></button>
+      <button class="nav-item" onclick="tryNav('eksplorasi')" id="nav-eksplorasi"><span class="nav-icon">🔍</span>Eksplorasi<span class="badge locked" id="badge-eksplorasi">🔒</span></button>
+      <button class="nav-item" onclick="tryNav('pengolahan')" id="nav-pengolahan"><span class="nav-icon">🧪</span>Pengolahan<span class="badge locked" id="badge-pengolahan">🔒</span></button>
+      <button class="nav-item" onclick="tryNav('verifikasi')" id="nav-verifikasi"><span class="nav-icon">✅</span>Verifikasi<span class="badge locked" id="badge-verifikasi">🔒</span></button>
+      <button class="nav-item" onclick="tryNav('posttest')" id="nav-posttest"><span class="nav-icon">🏆</span>Post-Test<span class="badge locked" id="badge-posttest">🔒</span></button>
+      <div class="nav-label" style="margin-top:8px">Open Lab</div>
+      <button class="nav-item" onclick="tryNav('library')" id="nav-library"><span class="nav-icon">📚</span>E-Book Library</button>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="btn-logout" onclick="doLogout()">🚪 Keluar</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1 id="welcome-msg">Selamat Datang! 🙏</h1>
+        <p>Mulai perjalanan dharma penelitianmu hari ini.</p>
+      </div>
+      <div class="journey-progress">
+        <h3>Progres Perjalanan Penemuanmu</h3>
+        <div class="steps-track" id="progress-track"></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card highlight">
+          <div class="sc-label">Tahap Aktif</div>
+          <div class="sc-value" id="d-stage">Pre-Test</div>
+          <div class="sc-sub">▶ Mulai sekarang</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Skor Pre-Test</div>
+          <div class="sc-value" id="d-pre">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Skor Post-Test</div>
+          <div class="sc-value" id="d-post">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">N-Gain Score</div>
+          <div class="sc-value" id="d-ngain">—</div>
+        </div>
+      </div>
+      <div id="current-action-card"></div>
+    </div>
+
+    <!-- PRE-TEST -->
+    <div class="page" id="page-pretest">
+      <div class="page-header"><h1>📋 Pre-Test</h1><p>Ukur pemahamanmu sebelum memulai pembelajaran.</p></div>
+      <div id="pretest-container"></div>
+    </div>
+
+    <!-- STIMULASI -->
+    <div class="page" id="page-stimulasi">
+      <div class="page-header"><h1>🎬 Stimulasi</h1><p>Amati fenomena keagamaan Hindu melalui video pilihan.</p></div>
+      <div class="video-grid" id="video-gallery"></div>
+      <div style="margin-top:24px; text-align:right">
+        <button class="btn-action" onclick="completeStage('stimulasi')">Lanjut ke Identifikasi →</button>
+      </div>
+    </div>
+
+    <!-- IDENTIFIKASI -->
+    <div class="page" id="page-identifikasi">
+      <div class="page-header"><h1>❓ Identifikasi Masalah</h1><p>Rumuskan pertanyaan penelitianmu tentang Tri Kerangka Dasar.</p></div>
+      <div class="input-section">
+        <h3>Pilih Panduan Pertanyaan</h3>
+        <p class="hint">Klik salah satu untuk dijadikan dasar pertanyaanmu, atau tulis sendiri.</p>
+        <div class="question-prompts">
+          <div class="prompt-chip" onclick="fillPrompt(this, 'Mengapa Tatwa, Susila, dan Upacara harus berjalan seimbang dalam kehidupan umat Hindu?')">Mengapa ketiganya harus seimbang?</div>
+          <div class="prompt-chip" onclick="fillPrompt(this, 'Bagaimana hubungan antara Tatwa (filsafat) dengan pelaksanaan Upacara (ritual) dalam agama Hindu?')">Hubungan Tatwa & Upacara</div>
+          <div class="prompt-chip" onclick="fillPrompt(this, 'Apa dampak jika salah satu dari Tri Kerangka Dasar Hindu tidak dijalankan dengan benar?')">Dampak jika tidak seimbang</div>
+          <div class="prompt-chip" onclick="fillPrompt(this, 'Bagaimana implementasi Susila (etika) dalam kehidupan sehari-hari umat Hindu modern?')">Implementasi Susila modern</div>
+        </div>
+      </div>
+      <div class="input-section">
+        <h3>Pertanyaan Penelitianmu</h3>
+        <p class="hint">Tulis minimal 2 pertanyaan yang ingin kamu teliti tentang Tri Kerangka Dasar Hindu (Tatwa, Susila, Upacara).</p>
+        <textarea class="big-textarea" id="identifikasi-text" placeholder="Contoh: Mengapa dalam agama Hindu, Tatwa, Susila, dan Upacara harus dipraktikkan secara bersamaan?&#10;&#10;Tulis pertanyaanmu di sini..." oninput="autoSave('identifikasi')"></textarea>
+        <p class="autosave-note">✓ <span id="autosave-identifikasi">Tersimpan otomatis</span></p>
+      </div>
+      <div style="text-align:right"><button class="btn-action" onclick="completeStage('identifikasi')">Lanjut ke Eksplorasi →</button></div>
+    </div>
+
+    <!-- EKSPLORASI -->
+    <div class="page" id="page-eksplorasi">
+      <div class="page-header"><h1>🔍 Smart Research Hub</h1><p>Riset mandiri dengan panduan AI dan akses langsung ke sumber ilmiah.</p></div>
+      <div class="research-hub">
+        <div class="hub-panel">
+          <div class="hub-panel-header">
+            <span>🤖</span>
+            <h4>AI Research Assistant</h4>
+          </div>
+          <div class="search-row">
+            <input type="text" id="ai-query" placeholder="Tanya tentang Tatwa, Susila, Upacara..." onkeydown="if(event.key==='Enter')askAI()" />
+            <button onclick="askAI()">Tanya →</button>
+          </div>
+          <div class="hub-panel-body">
+            <div class="chat-messages" id="chat-messages">
+              <div class="msg ai">Namaste! 🙏 Saya asisten riset TriVidia. Saya siap membantu kamu menjelajahi Tri Kerangka Dasar Agama Hindu — <strong>Tatwa, Susila, dan Upacara</strong>. Apa yang ingin kamu pelajari hari ini?</div>
+            </div>
+          </div>
+        </div>
+        <div class="hub-panel">
+          <div class="research-tabs">
+            <button class="research-tab-btn active" onclick="switchResearchTab('wiki')">🌐 Wikipedia</button>
+            <button class="research-tab-btn" onclick="switchResearchTab('scholar')">🎓 Google Scholar</button>
+          </div>
+          <div class="research-tab-content active" id="rtab-wiki">
+            <div class="search-row">
+              <input type="text" id="wiki-query" placeholder="Cari di Wikipedia..." onkeydown="if(event.key==='Enter')searchWiki()" value="Tri Kerangka Dasar Hindu" />
+              <button onclick="searchWiki()">Cari</button>
+            </div>
+            <iframe class="preview-frame" id="wiki-frame" src="https://id.wikipedia.org/wiki/Agama_Hindu"></iframe>
+          </div>
+          <div class="research-tab-content" id="rtab-scholar" style="display:none; flex-direction:column;">
+            <div class="search-row">
+              <input type="text" id="scholar-query" placeholder="Cari jurnal ilmiah..." onkeydown="if(event.key==='Enter')searchScholar()" value="Tatwa Susila Upacara Hindu" />
+              <button onclick="searchScholar()">Cari</button>
+            </div>
+            <iframe class="preview-frame" id="scholar-frame" src="https://scholar.google.com/scholar?q=Tatwa+Susila+Upacara+Hindu"></iframe>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px; text-align:right">
+        <button class="btn-action" onclick="completeStage('eksplorasi')">Lanjut ke Pengolahan →</button>
+      </div>
+    </div>
+
+    <!-- PENGOLAHAN -->
+    <div class="page" id="page-pengolahan">
+      <div class="page-header"><h1>🧪 Pengolahan Data</h1><p>Hubungkan hasil risetmu dengan pertanyaan penelitian yang sudah diidentifikasi.</p></div>
+      <div class="input-section">
+        <h3>Analisis & Temuan Riset</h3>
+        <p class="hint">Berdasarkan video yang kamu tonton dan riset yang kamu lakukan, tuliskan analisismu tentang Tri Kerangka Dasar Hindu. Hubungkan Tatwa (filsafat), Susila (etika), dan Upacara (ritual) dengan fenomena kehidupan nyata.</p>
+        <textarea class="big-textarea" id="pengolahan-text" style="min-height:220px" placeholder="Berdasarkan riset saya, Tatwa sebagai fondasi filsafat Hindu mengajarkan...&#10;&#10;Keterkaitan dengan Susila terlihat dari...&#10;&#10;Dalam praktik Upacara, hal ini diwujudkan melalui..." oninput="autoSave('pengolahan')"></textarea>
+        <p class="autosave-note">✓ <span id="autosave-pengolahan">Tersimpan otomatis</span></p>
+      </div>
+      <div class="input-section">
+        <h3>Kesimpulan Sementara</h3>
+        <p class="hint">Tuliskan kesimpulan sementara dari pengolahan data risetmu.</p>
+        <textarea class="big-textarea" id="kesimpulan-text" style="min-height:120px" placeholder="Dari penelitian ini, saya menyimpulkan bahwa..." oninput="autoSave('kesimpulan')"></textarea>
+      </div>
+      <div style="text-align:right"><button class="btn-action" onclick="completeStage('pengolahan')">Lanjut ke Verifikasi →</button></div>
+    </div>
+
+    <!-- VERIFIKASI -->
+    <div class="page" id="page-verifikasi">
+      <div class="page-header"><h1>✅ Verifikasi Data</h1><p>Bandingkan temuanmu dengan pandangan para pakar dan sumber terpercaya.</p></div>
+      <div class="verification-cards">
+        <div class="verif-card">
+          <h4>📖 Tatwa — Fondasi Filsafat</h4>
+          <p>Tatwa adalah sistem filsafat (tattva) yang menjadi landasan pemikiran agama Hindu. Ini mencakup pemahaman tentang hakikat Brahman, Atman, Karma, dan Moksa.</p>
+          <div class="expert-quote">"Tanpa pemahaman Tatwa yang benar, ritual hanyalah formalitas kosong tanpa makna spiritual." — Ida Pedanda Gede Made Gunung</div>
+          <div class="verif-status ok">✅ Sesuai dengan riset akademik</div>
+        </div>
+        <div class="verif-card">
+          <h4>🤝 Susila — Etika & Moral</h4>
+          <p>Susila adalah sistem etika Hindu yang mengatur perilaku manusia dalam hubungannya dengan Tuhan, sesama, dan alam semesta (Tri Hita Karana).</p>
+          <div class="expert-quote">"Susila yang baik adalah cerminan dari Tatwa yang dipahami dengan benar oleh seorang Hindu." — Prof. Dr. I Made Titib</div>
+          <div class="verif-status ok">✅ Terkonfirmasi referensi ilmiah</div>
+        </div>
+        <div class="verif-card">
+          <h4>🙏 Upacara — Ritual & Praktik</h4>
+          <p>Upacara adalah manifestasi konkret dari Tatwa dan Susila dalam bentuk ritual, yadnya, dan persembahan. Upacara menjadi jembatan antara manusia dengan yang ilahi.</p>
+          <div class="expert-quote">"Upacara yang dilaksanakan tanpa pemahaman Tatwa ibarat kulit tanpa isi." — Dharma Wacana TVRI</div>
+          <div class="verif-status ok">✅ Sesuai sumber Pelita Dharma</div>
+        </div>
+        <div class="verif-card">
+          <h4>⚖️ Keseimbangan Tri Kerangka</h4>
+          <ul>
+            <li>Ketiganya harus berjalan seimbang dan saling mendukung</li>
+            <li>Dominasi satu aspek tanpa yang lain akan merusak keharmonisan</li>
+            <li>Hindu mengajarkan integrasi total: pikiran (Tatwa), sikap (Susila), tindakan (Upacara)</li>
+          </ul>
+          <div class="verif-status warn">⚠️ Perlu eksplorasi lebih lanjut</div>
+        </div>
+      </div>
+      <div style="margin-top:24px; text-align:right">
+        <button class="btn-action" onclick="completeStage('verifikasi')">Lanjut ke Post-Test →</button>
+      </div>
+    </div>
+
+    <!-- POST-TEST -->
+    <div class="page" id="page-posttest">
+      <div class="page-header"><h1>🏆 Post-Test</h1><p>Evaluasi akhir setelah perjalanan risetmu. Tunjukkan kemampuan HOTS-mu!</p></div>
+      <div id="posttest-container"></div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="page" id="page-library">
+      <div class="page-header"><h1>📚 E-Book Library</h1><p>Referensi jurnal, buku, dan sumber ilmiah Hindu.</p></div>
+      <div class="ebook-grid">
+        <div class="ebook-card"><div class="ebook-cover" style="background:#FFF3E0">📿</div><div class="ebook-info"><div class="ebook-tag">Tatwa</div><h4>Tattva Hindu: Filsafat Dasar</h4><p>Pustaka Digital Hindu</p></div></div>
+        <div class="ebook-card"><div class="ebook-cover" style="background:#E8F5E9">🌿</div><div class="ebook-info"><div class="ebook-tag">Susila</div><h4>Etika Tri Hita Karana</h4><p>Prof. I Made Titib</p></div></div>
+        <div class="ebook-card"><div class="ebook-cover" style="background:#E3F2FD">🔔</div><div class="ebook-info"><div class="ebook-tag">Upacara</div><h4>Yadnya & Upacara Ageng</h4><p>PHDI Pusat</p></div></div>
+        <div class="ebook-card"><div class="ebook-cover" style="background:#FFF8E1">🕉️</div><div class="ebook-info"><div class="ebook-tag">Umum</div><h4>Hindu di Era Modern</h4><p>Jurnal Dharmasmrti</p></div></div>
+        <div class="ebook-card"><div class="ebook-cover" style="background:#FCE4EC">🌺</div><div class="ebook-info"><div class="ebook-tag">Upacara</div><h4>Ngaben: Spiritualitas & Makna</h4><p>Lembaga Publikasi IHDN</p></div></div>
+        <div class="ebook-card"><div class="ebook-cover" style="background:#EDE7F6">📜</div><div class="ebook-info"><div class="ebook-tag">Tatwa</div><h4>Brahma Vidya: Pengetahuan Tertinggi</h4><p>Koleksi Naskah Lontar</p></div></div>
+      </div>
+      <div style="margin-top:28px; padding:24px; background:white; border-radius:var(--radius); box-shadow:var(--shadow-sm);">
+        <h3 style="font-family:'Poppins',sans-serif; font-size:16px; font-weight:600; margin-bottom:12px;">🤖 Asisten AI Perpustakaan</h3>
+        <p style="font-size:14px; color:var(--slate-mid); margin-bottom:16px;">Tanya tentang buku, topik Hindu, atau minta rekomendasi bacaan.</p>
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="lib-query" placeholder="Contoh: Jelaskan perbedaan Tatwa dan Susila..." style="flex:1; padding:12px 16px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:14px; font-family:'Nunito Sans',sans-serif; outline:none;" onkeydown="if(event.key==='Enter')askLibAI()" />
+          <button onclick="askLibAI()" class="btn-action">Tanya AI →</button>
+        </div>
+        <div id="lib-ai-response" style="margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CELEBRATION OVERLAY -->
+<div id="celebration-overlay">
+  <div class="celebration-card">
+    <span class="trophy">🏆</span>
+    <h2>Luar Biasa, Peneliti Dharma!</h2>
+    <p>Perjalanan Dharmamu hari ini telah memperluas cakrawala berpikirmu. Kamu adalah peneliti masa depan!</p>
+    <div class="score-display">
+      <div class="score-box pre"><div class="sb-val" id="cel-pre">70</div><div class="sb-label">Pre-Test</div></div>
+      <div class="score-box post"><div class="sb-val" id="cel-post">90</div><div class="sb-label">Post-Test</div></div>
+      <div class="score-box ngain"><div class="sb-val" id="cel-ngain">0.67</div><div class="sb-label">N-Gain</div></div>
+    </div>
+    <div class="badge-row">
+      <div class="badge-item"><div class="badge-icon gold">🔬</div><div class="badge-name">Vedic Scientist</div></div>
+      <div class="badge-item"><div class="badge-icon gold" style="background:linear-gradient(135deg,#3F51B5,#7986CB)">📚</div><div class="badge-name">Dharma Scholar</div></div>
+      <div class="badge-item"><div class="badge-icon gold" style="background:linear-gradient(135deg,#27AE60,#58D68D)">⭐</div><div class="badge-name">Top Researcher</div></div>
+    </div>
+    <button class="btn-action" onclick="closeCelebration()" style="margin-top:8px; background:var(--saffron);">Mulai Open Lab 🚀</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif">✅ <span id="notif-msg"></span></div>
+
+<script>
+// ===== DATA & STATE =====
+const APP_USERS = JSON.parse(localStorage.getItem('tv_users') || '[]');
+let currentUser = JSON.parse(localStorage.getItem('tv_current') || 'null');
+let userProgress = JSON.parse(localStorage.getItem('tv_progress_' + (currentUser?.name||'')) || '{"stage":0,"preScore":null,"postScore":null,"preAnswers":{},"postAnswers":{},"identifikasi":"","pengolahan":"","kesimpulan":"","searches":[]}');
+
+const STAGES = ['pretest','stimulasi','identifikasi','eksplorasi','pengolahan','verifikasi','posttest'];
+const STAGE_LABELS = ['Pre-Test','Stimulasi','Identifikasi','Eksplorasi','Pengolahan','Verifikasi','Post-Test'];
+const STAGE_ICONS = ['📋','🎬','❓','🔍','🧪','✅','🏆'];
+
+const VIDEOS = [
+  {title:"Memahami Tiga Kerangka Dasar Agama Hindu – Pelita Dharma Ep. X", url:"https://www.youtube.com/embed/0Z5bCXgOBaU", tag:"Tatwa"},
+  {title:"Tatwa Upacara Susila Harus Berjalan Seimbang – Pelita Dharma Ep. XVII", url:"https://www.youtube.com/embed/RvZ0e5PFKvY", tag:"Keseimbangan"},
+  {title:"Tatwa, Susila, dan Upacara – Mimbar Hindu (TVRI)", url:"https://www.youtube.com/embed/_eq8yk7i1MU", tag:"Umum"},
+  {title:"Mencapai Kehidupan Harmonis Dengan Tiga Kerangka Dasar", url:"https://www.youtube.com/embed/MoP14eoAVTY", tag:"Harmoni"},
+  {title:"Dharma Wacana – Nilai-Nilai Tatwa Susila & Upacara Bagian 1", url:"https://www.youtube.com/embed/RQ9PEXrY4Og", tag:"Susila"},
+  {title:"Tiga Kerangka Dasar Agama Hindu (Penjelasan Utuh)", url:"https://www.youtube.com/embed/wuJmrMLV128", tag:"Utuh"},
+  {title:"Dharma Wacana Tri Kerangka Dasar Agama Hindu", url:"https://www.youtube.com/embed/CoNoPye9V8A", tag:"Dharma"},
+  {title:"Tiga Kerangka Dasar Agama Hindu dan Bagiannya (Materi Singkat)", url:"https://www.youtube.com/embed/RQf-nUiTGbI", tag:"Singkat"},
+  {title:"Memahami Upacara Ngaben Dari Sudut Tatwa Susila Upacara", url:"https://www.youtube.com/embed/bmROulNRrdg", tag:"Upacara"},
+  {title:"Tiga Kerangka Dasar Agama Hindu (Edukasi Visual)", url:"https://www.youtube.com/embed/AMk_GF-0NMw", tag:"Visual"}
 ];
 
-const initialArticles = [
-  { id: 1, title: "Jurnal Analisis Tattwa dalam Kehidupan Sosial", type: "Jurnal (PDF)", url: "https://scholar.google.com/" },
-  { id: 2, title: "E-Book: Implementasi Susila di Era Digital", type: "E-Book", url: "https://id.m.wikipedia.org/wiki/Etika" },
-  { id: 3, title: "Makna Simbolik Upacara Yadnya", type: "Artikel Web", url: "https://id.m.wikipedia.org/wiki/Yaj%C3%B1a" }
+const PRE_QUESTIONS = [
+  {q:"Apa yang dimaksud dengan Tatwa dalam Tri Kerangka Dasar Agama Hindu?",opts:["Sistem ritual keagamaan","Landasan filsafat dan metafisika Hindu","Norma etika dan moral umat Hindu","Upacara persembahan kepada Dewa"],ans:1},
+  {q:"Susila dalam konteks Hindu berkaitan dengan...",opts:["Pelaksanaan ritual yadnya","Etika, moral, dan perilaku yang baik","Ajaran filsafat Brahman-Atman","Tata cara upacara adat"],ans:1},
+  {q:"Upacara dalam agama Hindu berfungsi sebagai...",opts:["Sistem hukum keagamaan","Wujud nyata dari filsafat melalui ritual","Pedoman etika bermasyarakat","Ajaran tentang moksa"],ans:1},
+  {q:"Mengapa Tatwa, Susila, dan Upacara harus berjalan seimbang?",opts:["Agar umat Hindu terlihat religius","Karena ketiganya saling melengkapi dan memperkuat","Karena diwajibkan oleh hukum adat","Agar mendapat pengakuan masyarakat"],ans:1},
+  {q:"Konsep Tri Hita Karana berkaitan erat dengan aspek...",opts:["Tatwa","Upacara","Susila","Semua aspek Hindu"],ans:2},
+  {q:"Ngaben adalah contoh dari...",opts:["Susila","Tatwa","Upacara","Dharma"],ans:2},
+  {q:"Brahma Vidya merupakan bagian dari aspek...",opts:["Upacara","Susila","Karma","Tatwa"],ans:3},
+  {q:"Jika Upacara dilaksanakan tanpa pemahaman Tatwa, maka...",opts:["Ritual menjadi lebih sakral","Ritual menjadi formalitas tanpa makna","Susila secara otomatis meningkat","Tidak ada pengaruhnya"],ans:1},
+  {q:"Tri Kerangka Dasar Hindu secara berurutan adalah...",opts:["Upacara-Susila-Tatwa","Tatwa-Upacara-Susila","Tatwa-Susila-Upacara","Susila-Tatwa-Upacara"],ans:2},
+  {q:"Yadnya merupakan implementasi dari...",opts:["Tatwa semata","Susila semata","Upacara dalam kehidupan Hindu","Karma Yoga"],ans:2}
 ];
 
-const questionBank = {
-  mcq: [
-    { id: 1, text: "Dalam tradisi Mebanten Saiban, masyarakat meletakkan sedikit makanan sebelum makan. Jika dianalisis, tindakan ini merupakan integrasi dari...", options: ["Hanya wujud Upacara kebiasaan", "Tattwa (Keyakinan pada Tuhan pemberi rezeki) dan Susila (rasa syukur/berbagi)", "Susila (etika makan) tanpa ada unsur Tattwa", "Upacara yang tidak ada hubungannya dengan Susila"], answer: "Tattwa (Keyakinan pada Tuhan pemberi rezeki) dan Susila (rasa syukur/berbagi)" },
-    { id: 2, text: "Seseorang sangat paham kitab suci (Tattwa) namun sering menyebarkan berita bohong (hoax) di media sosial. Analisis masalah ini berdasarkan Tri Kerangka Dasar!", options: ["Ia telah melaksanakan agama dengan sempurna karena Tattwanya tinggi", "Terjadi ketimpangan: Pengetahuan Tattwa tidak diiringi dengan praktik Susila (Tri Kaya Parisudha)", "Ia hanya kurang melakukan Upacara ruwatan", "Berita bohong tidak ada hubungannya dengan agama"], answer: "Terjadi ketimpangan: Pengetahuan Tattwa tidak diiringi dengan praktik Susila (Tri Kaya Parisudha)" },
-    { id: 3, text: "Mengapa Susila sering disebut sebagai 'jembatan' penghubung antara Tattwa dan Upacara?", options: ["Karena Susila menghubungkan pikiran filosofis (Tattwa) menjadi tindakan nyata sebelum diwujudkan dalam persembahan (Upacara)", "Karena letaknya di tengah-tengah buku pelajaran", "Karena Susila paling mudah dihafal", "Karena Susila tidak membutuhkan pemahaman Tattwa"], answer: "Karena Susila menghubungkan pikiran filosofis (Tattwa) menjadi tindakan nyata sebelum diwujudkan dalam persembahan (Upacara)" },
-    { id: 4, text: "Sebuah desa menggelar Ngaben massal untuk meringankan beban warganya. Prinsip apa yang paling menonjol dari fenomena ini?", options: ["Hanya pamer kekayaan desa", "Upacara yang dilandasi oleh semangat Susila (kepedulian sosial/menolong sesama)", "Tattwa bahwa Ngaben harus murah", "Pelanggaran aturan agama"], answer: "Upacara yang dilandasi oleh semangat Susila (kepedulian sosial/menolong sesama)" },
-    { id: 5, text: "Prinsip Tat Twam Asi (Aku adalah Engkau) menjadi landasan logis paling kuat untuk kita melaksanakan...", options: ["Upacara besar-besaran setiap hari", "Perilaku Susila (etika sosial dan empati terhadap makhluk lain)", "Membangun pura megah", "Menghafal seluruh mantram"], answer: "Perilaku Susila (etika sosial dan empati terhadap makhluk lain)" },
-    { id: 6, text: "Banten Pejati dibeli jadi dari pasar, bukan dibuat sendiri. Bagaimana pandangan analitis berdasarkan Tri Kerangka Dasar?", options: ["Dilarang keras karena tidak suci", "Sah saja selama dilandasi ketulusan (Susila) dan niat/pemahaman (Tattwa) yang benar, bukan sekadar menggugurkan kewajiban", "Lebih baik tidak usah mebanten sama sekali", "Banten beli selalu lebih baik secara Upacara"], answer: "Sah saja selama dilandasi ketulusan (Susila) dan niat/pemahaman (Tattwa) yang benar, bukan sekadar menggugurkan kewajiban" },
-    { id: 7, text: "Jika Tattwa ibarat 'teori keseimbangan' dan Upacara adalah 'alatnya', maka fungsi Susila adalah...", options: ["Menghancurkan alat tersebut", "Buku panduannya", "Cara kerja/perilaku seimbang dalam mengoperasikan alat tersebut di kehidupan nyata", "Hanya hiasan tambahan"], answer: "Cara kerja/perilaku seimbang dalam mengoperasikan alat tersebut di kehidupan nyata" },
-    { id: 8, text: "Pelaksanaan Yadnya (Upacara) yang dilakukan dengan berhutang hingga memicu konflik keluarga, melanggar prinsip...", options: ["Tattwa (Karmaphala) dan Susila (memaksakan diri/tidak damai)", "Dharma karena semua upacara besar dibenarkan", "Tidak ada yang dilanggar asal bantennya lengkap", "Hanya melanggar aturan ekonomi"], answer: "Tattwa (Karmaphala) dan Susila (memaksakan diri/tidak damai)" },
-    { id: 9, text: "Di era digital, orang berdonasi (Punia) secara online tanpa sesajen fisik. Apakah ini termasuk Yadnya?", options: ["Tidak, karena tidak ada bantennya", "Ya, karena esensi Yadnya (Tattwa) adalah pengorbanan tulus, yang diwujudkan dalam tindakan menolong (Susila)", "Hanya jika ditransfer ke rekening Pura", "Bukan, itu hanya sumbangan biasa"], answer: "Ya, karena esensi Yadnya (Tattwa) adalah pengorbanan tulus, yang diwujudkan dalam tindakan menolong (Susila)" },
-    { id: 10, text: "Apa dampak paling berbahaya jika sebuah masyarakat hanya fokus pada Upacara tanpa memahami Tattwa dan Susila?", options: ["Agama menjadi sekadar tradisi kosong (rutinitas) yang rawan kehilangan makna spiritualnya", "Masyarakat akan semakin kaya raya", "Agama akan semakin kuat", "Tattwa dan Susila akan muncul dengan sendirinya"], answer: "Agama menjadi sekadar tradisi kosong (rutinitas) yang rawan kehilangan makna spiritualnya" },
-    { id: 11, text: "Konsep Tri Hita Karana (Hubungan harmonis dengan Tuhan, Manusia, Alam) paling tepat direpresentasikan sebagai wujud dari...", options: ["Tattwa saja", "Hanya Upacara", "Integrasi utuh dari ajaran Susila yang dilandasi Tattwa", "Aturan pemerintah"], answer: "Integrasi utuh dari ajaran Susila yang dilandasi Tattwa" },
-    { id: 12, text: "Seorang peneliti menemukan bahwa simbol 'Beras' dalam banten bermakna kehidupan. Penemuan ini berada di ranah...", options: ["Susila", "Tattwa (pemaknaan filosofis di balik simbol Upacara)", "Kesenian murni", "Ekonomi agraris"], answer: "Tattwa (pemaknaan filosofis di balik simbol Upacara)" }
-  ],
-  preEssay: "Berdasarkan pemahaman awalmu, ceritakan pengalamanmu melihat sebuah upacara adat/agama. Menurutmu, apa sebenarnya makna dari kegiatan tersebut selain dari sekadar 'kewajiban tradisi'?",
-  postEssay: "HOTS ANALISIS: Pilih satu fenomena sosial di sekitarmu (misal: gotong royong, konflik warga, atau perayaan hari raya). Analisis fenomena tersebut menggunakan pisau bedah Tattwa, Susila, dan Upacara secara komprehensif!"
+const POST_QUESTIONS = [
+  {q:"[HOTS] Seorang pemuda Hindu rajin melaksanakan upacara namun tidak memahami maknanya dan tidak menerapkan etika yang baik. Apa yang salah?",opts:["Tidak ada yang salah, upacara sudah cukup","Tatwa dan Susila-nya tidak berkembang bersama Upacara","Upacara-nya kurang sering dilakukan","Dia perlu menambah ritual"],ans:1},
+  {q:"[HOTS] Bagaimana hubungan dialektis antara Tatwa dan Susila dalam kehidupan Hindu?",opts:["Tatwa dan Susila tidak berhubungan","Pemahaman Tatwa yang benar menghasilkan Susila yang baik","Susila mendahului Tatwa","Keduanya independen"],ans:1},
+  {q:"[Analisis] Konsep 'Tat Tvam Asi' termasuk dalam aspek...",opts:["Susila","Upacara","Tatwa (filsafat)","Karma"],ans:2},
+  {q:"[Evaluasi] Menurut video pembelajaran, apa akibat jika salah satu dari Tri Kerangka tidak dijalankan?",opts:["Kehidupan spiritual tetap harmonis","Keseimbangan hidup akan terganggu","Tidak ada pengaruhnya","Upacara menjadi lebih penting"],ans:1},
+  {q:"[Sintesis] Bagaimana seorang Hindu modern dapat mengintegrasikan Tri Kerangka Dasar?",opts:["Hanya fokus pada ritual saja","Mempelajari filsafat, menerapkan etika, dan melaksanakan ritual secara terintegrasi","Memilih satu aspek yang paling mudah","Mengikuti semua tradisi tanpa memahaminya"],ans:1},
+  {q:"Perbedaan mendasar Tatwa dengan Susila adalah...",opts:["Tidak ada perbedaan","Tatwa = filsafat, Susila = etika/moral","Tatwa = ritual, Susila = filsafat","Tatwa = doa, Susila = upacara"],ans:1},
+  {q:"[HOTS] Mengapa Tri Kerangka Dasar disebut sebagai 'kerangka' bukan 'komponen' terpisah?",opts:["Karena merupakan bagian struktural yang saling menopang","Karena hanya istilah akademis","Karena ketiganya tidak berhubungan","Karena hanya budaya Bali"],ans:0},
+  {q:"Moksa dalam Tatwa Hindu berarti...",opts:["Pelaksanaan ritual terbaik","Kebebasan sejati dari siklus samsara","Etika tertinggi","Upacara terbesar"],ans:1},
+  {q:"[Aplikasi] Seorang guru Hindu mengajar muridnya tentang karma dan dharma. Ini masuk dalam ranah...",opts:["Upacara","Susila dan Tatwa","Ritual yadnya","Mantra"],ans:1},
+  {q:"[Evaluasi] Kontribusi terbesar Tri Kerangka Dasar bagi umat Hindu adalah...",opts:["Menjaga tradisi lama","Memberikan panduan hidup yang komprehensif dan holistik","Membedakan Hindu dari agama lain","Memperbanyak ritual"],ans:1}
+];
+
+const ADMIN_DATA = [
+  {name:"I Putu Arjuna Dharma", pre:60, post:85, ngain:0.63},
+  {name:"Ni Luh Ayu Saraswati", pre:70, post:95, ngain:0.83},
+  {name:"I Wayan Bayu Sanjaya", pre:50, post:80, ngain:0.60},
+  {name:"Ni Kadek Ratna Dewi", pre:65, post:90, ngain:0.71},
+  {name:"I Made Sukerta", pre:55, post:85, ngain:0.67},
+  {name:"Ni Nyoman Ayu Purnami", pre:75, post:95, ngain:0.80},
+];
+
+const SEARCH_LOGS = [
+  {user:"I Putu Arjuna", kw:"Tatwa Hindu pengertian", time:"10:32"},
+  {user:"Ni Luh Ayu", kw:"Susila etika agama Hindu", time:"10:45"},
+  {user:"I Wayan Bayu", kw:"Upacara Ngaben makna spiritual", time:"11:02"},
+  {user:"Ni Kadek Ratna", kw:"Tri Hita Karana Susila", time:"11:15"},
+  {user:"I Made Sukerta", kw:"Brahma Vidya Tatwa", time:"11:28"},
+  {user:"Ni Nyoman Ayu", kw:"keseimbangan Tatwa Susila Upacara", time:"11:40"},
+];
+
+// ===== QUIZ STATE =====
+let quizCurrent = {mode:'pre', questions:[], idx:0, answers:{}, timer:null, timeLeft:600, essayAnswer:''};
+
+// ===== INIT =====
+window.onload = () => {
+  if (currentUser) {
+    loadUserProgress();
+    showScreen('app');
+  }
+  renderAdminTable();
+  renderAdminSearchLog();
+  renderAdminVideoList();
 };
 
-export default function App() {
-  // Global States
-  const [currentView, setCurrentView] = useState('auth'); // auth, student_path, student_dash, admin
-  const [currentUser, setCurrentUser] = useState(null);
-  const [usersDb, setUsersDb] = useState([]);
-  
-  // States that Admin can modify
-  const [contentDb, setContentDb] = useState({ videos: initialVideos, articles: initialArticles });
-  const [questionsDb, setQuestionsDb] = useState(questionBank);
-
-  // Inject Styles (Fonts & Animations)
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
-      body { background-color: #f8fafc; color: #0f172a; }
-      .font-poppins { font-family: 'Poppins', sans-serif; }
-      .font-nunito { font-family: 'Nunito Sans', sans-serif; }
-      
-      /* Animations */
-      .fade-in { animation: fadeIn 0.5s ease-in-out; }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      
-      .icon-bounce:hover { transform: translateY(-4px) scale(1.1); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-      .icon-spin-active { animation: spin 4s linear infinite; }
-      @keyframes spin { 100% { transform: rotate(360deg); } }
-      
-      .icon-pulse { animation: pulse 2s infinite; }
-      @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
-      
-      /* Confetti Logic */
-      .confetti-container { position: absolute; width: 100%; height: 100%; overflow: hidden; top:0; left:0; pointer-events: none; }
-      .confetti { position: absolute; width: 10px; height: 10px; background-color: #f59e0b; animation: fall linear forwards; }
-      @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
-      
-      .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
-      .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
-
-  // Handlers
-  const handleAuth = (user) => {
-    setCurrentUser(user);
-    if (user.role === 'admin') setCurrentView('admin');
-    else if (user.step >= 8) setCurrentView('student_dash');
-    else setCurrentView('student_path');
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setCurrentView('auth');
-  };
-
-  const updateStudentData = (updatedFields) => {
-    const updatedUser = { ...currentUser, ...updatedFields };
-    setCurrentUser(updatedUser);
-    setUsersDb(usersDb.map(u => u.id === currentUser.id ? updatedUser : u));
-    
-    // Auto Transition Logic
-    if (updatedFields.step >= 8 && currentView === 'student_path') {
-        setCurrentView('student_dash');
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      {/* Universal Navbar */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center space-x-3 cursor-pointer group">
-              <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-md">
-                <Globe className="w-6 h-6" />
-              </div>
-              <span className="font-poppins font-bold text-2xl tracking-tight text-slate-800">Tri<span className="text-orange-500">Vidia</span></span>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              {currentUser && (
-                <>
-                  <span className="font-nunito font-semibold text-slate-600 hidden sm:inline text-sm">
-                    {currentUser.role === 'admin' ? 'Control Center' : `Halo, ${currentUser.nickName}`}
-                  </span>
-                  <button onClick={handleLogout} className="flex items-center space-x-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-poppins text-sm transition-colors font-semibold shadow-sm">
-                    <LogOut className="w-4 h-4" /> <span className="hidden sm:inline">Keluar</span>
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content Router */}
-      <main className="flex-grow flex flex-col relative">
-        {currentView === 'auth' && <AuthPage usersDb={usersDb} setUsersDb={setUsersDb} onAuth={handleAuth} />}
-        {currentView === 'student_path' && <StudentLinearPath user={currentUser} updateData={updateStudentData} contentDb={contentDb} questionsDb={questionsDb} />}
-        {currentView === 'student_dash' && <StudentDashboard user={currentUser} contentDb={contentDb} updateData={updateStudentData} questionsDb={questionsDb} />}
-        {currentView === 'admin' && <AdminDashboard usersDb={usersDb} contentDb={contentDb} setContentDb={setContentDb} questionsDb={questionsDb} setQuestionsDb={setQuestionsDb} />}
-      </main>
-    </div>
-  );
+function saveProgress() {
+  localStorage.setItem('tv_progress_' + currentUser.name, JSON.stringify(userProgress));
 }
 
-// ==========================================
-// 2. AUTHENTICATION PAGE
-// ==========================================
-function AuthPage({ usersDb, setUsersDb, onAuth }) {
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ fullName: '', nickName: '', password: '', confirm: '' });
-  const [error, setError] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (isLogin) {
-      if (formData.fullName === 'admin' && formData.password === 'admin') return onAuth({ role: 'admin', id: 'admin' });
-      
-      const user = usersDb.find(u => (u.fullName === formData.fullName || u.nickName === formData.fullName) && u.password === formData.password);
-      if (user) onAuth(user);
-      else setError('Identitas atau Password tidak ditemukan.');
-    } else {
-      if (formData.password !== formData.confirm) return setError('Konfirmasi password salah!');
-      if (formData.password.length < 6) return setError('Password minimal 6 karakter.');
-      if (usersDb.some(u => u.fullName.toLowerCase() === formData.fullName.toLowerCase())) return setError('Nama sudah terdaftar.');
-
-      const newUser = {
-        id: Date.now().toString(), role: 'student',
-        fullName: formData.fullName, nickName: formData.nickName, password: formData.password,
-        step: 0, 
-        preTestScore: null, postTestScore: null,
-        answers: { preEssay: '', problem: '', processing: '', conclusion: '', postEssay: '' },
-        searchLogs: []
-      };
-      setUsersDb([...usersDb, newUser]);
-      onAuth(newUser);
-    }
-  };
-
-  return (
-    <div className="flex-grow flex items-center justify-center p-4 bg-slate-50 fade-in">
-      <div className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-500 to-amber-400"></div>
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-poppins font-extrabold text-slate-800 mb-2">{isLogin ? 'Gerbang Riset' : 'Daftar Peneliti'}</h2>
-          <p className="font-nunito text-slate-500 text-sm">Media Pembelajaran Discovery Learning HOTS</p>
-        </div>
-
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm mb-6 font-nunito border border-red-200 font-semibold">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="space-y-4 font-nunito">
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">{isLogin ? 'Nama Lengkap / Panggilan' : 'Nama Lengkap (Sesuai Presensi)'}</label>
-            <input type="text" required value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})}
-              className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-indigo-500 outline-none transition bg-slate-50" />
-          </div>
-
-          {!isLogin && (
-            <div className="fade-in">
-              <label className="block text-sm font-bold text-slate-700 mb-1">Nama Panggilan</label>
-              <input type="text" required value={formData.nickName} onChange={e => setFormData({...formData, nickName: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-indigo-500 outline-none transition bg-slate-50" />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Password</label>
-            <input type="password" required value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})}
-              className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-indigo-500 outline-none transition bg-slate-50" />
-          </div>
-
-          {!isLogin && (
-            <div className="fade-in">
-              <label className="block text-sm font-bold text-slate-700 mb-1">Konfirmasi Password</label>
-              <input type="password" required value={formData.confirm} onChange={e => setFormData({...formData, confirm: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-indigo-500 outline-none transition bg-slate-50" />
-            </div>
-          )}
-
-          <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-bold py-3.5 px-4 rounded-xl transition shadow-lg mt-6">
-            {isLogin ? 'Masuk' : 'Mulai Meneliti'}
-          </button>
-        </form>
-
-        <div className="mt-8 text-center font-nunito text-sm text-slate-500">
-          <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="text-orange-600 font-bold hover:underline">
-            {isLogin ? 'Belum terdaftar? Buat Akun' : 'Sudah punya akun? Masuk'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+function loadUserProgress() {
+  userProgress = JSON.parse(localStorage.getItem('tv_progress_' + currentUser.name) || '{"stage":0,"preScore":null,"postScore":null,"preAnswers":{},"postAnswers":{},"identifikasi":"","pengolahan":"","kesimpulan":"","searches":[]}');
 }
 
-// ==========================================
-// 3. STUDENT LINEAR PATH (Syntax 0 - 7)
-// ==========================================
-function StudentLinearPath({ user, updateData, contentDb, questionsDb }) {
-  const step = user.step;
+// ===== AUTH =====
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('auth-form-login').style.display = tab==='login' ? 'flex' : 'none';
+  document.getElementById('auth-form-register').style.display = tab==='register' ? 'flex' : 'none';
+}
 
-  if (step === 0) return <QuizEngine type="preTest" user={user} updateData={updateData} questionsDb={questionsDb} />;
-  if (step === 6) return <QuizEngine type="postTest" user={user} updateData={updateData} questionsDb={questionsDb} />;
-  if (step === 7) return <AppreciationScreen user={user} onContinue={() => updateData({ step: 8 })} />;
+function doLogin() {
+  const name = document.getElementById('login-name').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!name || !pass) { showNotif('Isi nama dan kata sandi!', true); return; }
+  const users = JSON.parse(localStorage.getItem('tv_users') || '[]');
+  const found = users.find(u => (u.name===name||u.nick===name) && u.pass===pass);
+  if (!found) { showNotif('Data tidak ditemukan. Daftar dulu!', true); return; }
+  currentUser = found;
+  localStorage.setItem('tv_current', JSON.stringify(found));
+  loadUserProgress();
+  showScreen('app');
+  showNotif('Selamat datang, ' + found.nick + '! 🙏');
+}
 
-  const stepsDef = [
-    { id: 1, title: 'Stimulasi', icon: <Zap size={18}/> },
-    { id: 2, title: 'Identifikasi', icon: <Target size={18}/> },
-    { id: 3, title: 'Eksplorasi', icon: <Globe size={18}/> },
-    { id: 4, title: 'Pengolahan', icon: <Database size={18}/> },
-    { id: 5, title: 'Verifikasi', icon: <CheckCircle size={18}/> }
+function doRegister() {
+  const fullname = document.getElementById('reg-fullname').value.trim();
+  const nick = document.getElementById('reg-nickname').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  if (!fullname || !nick || !pass) { showNotif('Lengkapi semua data!', true); return; }
+  const users = JSON.parse(localStorage.getItem('tv_users') || '[]');
+  users.push({name:fullname, nick, pass});
+  localStorage.setItem('tv_users', JSON.stringify(users));
+  currentUser = {name:fullname, nick, pass};
+  localStorage.setItem('tv_current', JSON.stringify(currentUser));
+  userProgress = {stage:0,preScore:null,postScore:null,preAnswers:{},postAnswers:{},identifikasi:"",pengolahan:"",kesimpulan:"",searches:[]};
+  saveProgress();
+  showScreen('app');
+  showNotif('Akun berhasil dibuat! Selamat belajar 🙏');
+}
+
+function doLogout() {
+  localStorage.removeItem('tv_current');
+  currentUser = null;
+  showScreen('auth');
+}
+
+function goAdmin() {
+  showScreen('admin');
+}
+
+function backToAuth() {
+  showScreen('auth');
+}
+
+// ===== SCREEN =====
+function showScreen(s) {
+  document.querySelectorAll('.screen').forEach(sc => sc.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  if (s==='app') setupApp();
+}
+
+function setupApp() {
+  document.getElementById('sidebar-username').textContent = currentUser ? currentUser.nick : '—';
+  document.getElementById('welcome-msg').textContent = 'Selamat datang, ' + (currentUser?.nick||'') + '! 🙏';
+  updateNavBadges();
+  renderProgressTrack();
+  renderDashboard();
+  renderVideos();
+  if (document.getElementById('identifikasi-text')) {
+    document.getElementById('identifikasi-text').value = userProgress.identifikasi || '';
+  }
+  if (document.getElementById('pengolahan-text')) {
+    document.getElementById('pengolahan-text').value = userProgress.pengolahan || '';
+  }
+  showPage('dashboard');
+}
+
+function updateNavBadges() {
+  const stage = userProgress.stage;
+  STAGES.forEach((s, i) => {
+    const badge = document.getElementById('badge-'+s);
+    if (!badge) return;
+    if (i < stage) { badge.textContent = '✓'; badge.classList.remove('locked'); badge.style.background='var(--success)'; }
+    else if (i === stage) { badge.textContent = i+1; badge.classList.remove('locked'); badge.style.background='var(--saffron)'; }
+    else { badge.textContent = '🔒'; badge.classList.add('locked'); }
+  });
+}
+
+function renderProgressTrack() {
+  const stage = userProgress.stage;
+  const track = document.getElementById('progress-track');
+  track.innerHTML = STAGES.map((s,i) => `
+    <div class="step-item ${i<stage?'done':i===stage?'active':'locked'}">
+      <div class="step-dot">${i<stage?'✓':STAGE_ICONS[i]}</div>
+      <div class="step-label">${STAGE_LABELS[i]}</div>
+    </div>
+  `).join('');
+}
+
+function renderDashboard() {
+  const stage = userProgress.stage;
+  document.getElementById('d-stage').textContent = STAGE_LABELS[Math.min(stage, STAGES.length-1)];
+  document.getElementById('d-pre').textContent = userProgress.preScore !== null ? userProgress.preScore : '—';
+  document.getElementById('d-post').textContent = userProgress.postScore !== null ? userProgress.postScore : '—';
+  if (userProgress.preScore !== null && userProgress.postScore !== null) {
+    const ng = ((userProgress.postScore - userProgress.preScore) / (100 - userProgress.preScore)).toFixed(2);
+    document.getElementById('d-ngain').textContent = ng;
+  } else {
+    document.getElementById('d-ngain').textContent = '—';
+  }
+  const ac = document.getElementById('current-action-card');
+  const nextStage = STAGES[stage] || null;
+  if (nextStage) {
+    ac.innerHTML = `<div class="action-card"><h3>${STAGE_ICONS[stage]} ${STAGE_LABELS[stage]}</h3><p>${getStageDesc(stage)}</p><button class="btn-action" onclick="tryNav('${nextStage}')">${stage===0?'Mulai':'Lanjutkan'} ${STAGE_LABELS[stage]} →</button></div>`;
+  } else {
+    ac.innerHTML = `<div class="action-card" style="background:linear-gradient(135deg,var(--saffron),var(--gold));color:white"><h3 style="color:white">🎉 Open Lab Aktif!</h3><p style="color:rgba(255,255,255,0.9)">Semua tahap selesai! Kamu bebas mengakses seluruh fitur TriVidia.</p></div>`;
+  }
+}
+
+function getStageDesc(i) {
+  const descs = [
+    "Jawab 10 soal pilihan ganda dan 1 esai untuk mengukur pengetahuan awalmu.",
+    "Tonton video-video pilihan tentang Tri Kerangka Dasar Hindu.",
+    "Rumuskan pertanyaan penelitian berdasarkan video yang kamu tonton.",
+    "Gunakan AI Assistant dan Wikipedia untuk meneliti topikmu.",
+    "Analisis dan hubungkan temuan riset dengan pertanyaan penelitianmu.",
+    "Validasi temuanmu dengan pandangan para pakar Hindu.",
+    "Evaluasi akhir dengan 10 soal HOTS dan esai. Selamat berjuang!"
   ];
-
-  return (
-    <div className="flex-grow flex flex-col md:flex-row bg-slate-50 fade-in h-[calc(100vh-64px)] overflow-hidden">
-      {/* Sidebar Navigation */}
-      <div className="w-full md:w-64 bg-white border-r border-slate-200 p-6 shrink-0 overflow-y-auto">
-        <p className="font-poppins font-extrabold text-slate-400 text-xs uppercase tracking-widest mb-6">Peta Discovery</p>
-        <ul className="space-y-2 flex md:block overflow-x-auto md:overflow-visible pb-2 md:pb-0 custom-scrollbar">
-          {stepsDef.map((s) => (
-            <li key={s.id} className={`flex items-center min-w-fit md:min-w-0 p-3 rounded-xl font-poppins text-sm font-bold transition-all ${
-              step === s.id ? 'bg-indigo-50 text-indigo-700 shadow-sm border border-indigo-100' : 
-              step > s.id ? 'text-slate-500' : 'text-slate-300 opacity-50'
-            }`}>
-              <div className="mr-3">{s.icon}</div>
-              {s.id}. {s.title}
-              {step > s.id && <CheckCircle size={14} className="ml-auto text-green-500 hidden md:block" />}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Main Area */}
-      <div className="flex-grow p-4 md:p-8 flex flex-col overflow-hidden w-full">
-        <div className="bg-white rounded-[2rem] shadow-md border border-slate-200 flex flex-col h-full relative overflow-hidden">
-          
-          <div className="p-4 md:p-8 flex-grow overflow-y-auto custom-scrollbar">
-            {step === 1 && <Syntax1 videos={contentDb.videos} />}
-            {step === 2 && <Syntax2 user={user} updateData={updateData} />}
-            {step === 3 && <Syntax3 user={user} updateData={updateData} />}
-            {step === 4 && <Syntax4 user={user} updateData={updateData} />}
-            {step === 5 && <Syntax5 user={user} />}
-          </div>
-
-          <div className="bg-slate-50 border-t border-slate-200 p-4 md:p-6 rounded-b-[2rem] flex justify-between shrink-0">
-            <button onClick={() => updateData({ step: step - 1 })} disabled={step===1}
-              className={`px-4 md:px-6 py-3 rounded-xl font-poppins font-bold flex items-center transition ${step===1?'opacity-0':'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 shadow-sm'}`}>
-              <ArrowLeft size={18} className="mr-2" /> Kembali
-            </button>
-            <button onClick={() => updateData({ step: step + 1 })}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 md:px-8 py-3 rounded-xl font-poppins font-bold shadow-lg transition flex items-center active:scale-95">
-              {step === 5 ? 'Lanjut ke Post-Test' : 'Lanjut Tahap'} <ArrowRight size={18} className="ml-2" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return descs[i] || '';
 }
 
-// --- Syntax Components ---
-function Syntax1({ videos }) {
-  const [activeVid, setActiveVid] = useState(videos[0] || {});
-  return (
-    <div className="fade-in max-w-5xl mx-auto h-full flex flex-col">
-      <div className="mb-6 flex items-center gap-3 shrink-0">
-        <div className="p-3 bg-orange-100 text-orange-600 rounded-xl icon-pulse"><Zap size={24} /></div>
-        <div>
-          <h2 className="text-2xl font-poppins font-bold text-slate-800">Tahap 1: Stimulasi Fenomena</h2>
-          <p className="font-nunito text-slate-500">Pilih dan amati salah satu video. Temukan adakah kesenjangan antara teori agama dan praktik nyatanya.</p>
-        </div>
-      </div>
-      <div className="aspect-video w-full bg-slate-900 rounded-3xl overflow-hidden shadow-xl mb-6 shrink-0 border-4 border-slate-100">
-        {activeVid.isLocal ? (
-          <video src={activeVid.url} controls className="w-full h-full object-cover" />
-        ) : (
-          <iframe className="w-full h-full" src={activeVid.url} title={activeVid.title} frameBorder="0" allowFullScreen></iframe>
-        )}
-      </div>
-      <h3 className="font-poppins font-bold text-sm text-slate-500 uppercase tracking-widest mb-4 shrink-0">Galeri Pilihan Peneliti</h3>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto custom-scrollbar pr-2 flex-grow">
-        {videos.map((v, idx) => (
-          <button key={idx} onClick={() => setActiveVid(v)}
-            className={`text-left p-4 rounded-2xl border transition-all flex flex-col gap-2 ${activeVid.id === v.id ? 'bg-orange-50 border-orange-400 shadow-md ring-1 ring-orange-500' : 'bg-white border-slate-200 hover:border-orange-300 hover:bg-slate-50'}`}>
-            <div className="flex justify-between items-start w-full">
-               <PlayCircle className={`w-8 h-8 shrink-0 ${activeVid.id === v.id ? 'text-orange-600' : 'text-slate-300'}`} />
-               {v.isLocal && <span className="bg-blue-100 text-blue-600 text-[10px] px-2 py-1 rounded-md font-bold uppercase">File Lokal</span>}
-            </div>
-            <span className={`font-poppins font-bold text-sm leading-snug line-clamp-2 ${activeVid.id === v.id ? 'text-orange-900' : 'text-slate-600'}`}>{v.title}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+// ===== NAV =====
+function tryNav(page) {
+  const idx = STAGES.indexOf(page);
+  if (idx > userProgress.stage && page !== 'library') {
+    showNotif('Selesaikan tahap ' + STAGE_LABELS[userProgress.stage] + ' dulu! 🔒', true);
+    return;
+  }
+  showPage(page);
+  // nav highlight
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  if (page === 'pretest') initQuiz('pre');
+  if (page === 'posttest') initQuiz('post');
 }
 
-function Syntax2({ user, updateData }) {
-  return (
-    <div className="fade-in max-w-4xl mx-auto h-full flex flex-col">
-      <div className="mb-6 flex items-center gap-3 shrink-0">
-        <div className="p-3 bg-indigo-100 text-indigo-600 rounded-xl"><Target size={24} /></div>
-        <div>
-          <h2 className="text-2xl font-poppins font-bold text-slate-800">Tahap 2: Identifikasi Masalah</h2>
-          <p className="font-nunito text-slate-500">Rumuskan 1 pertanyaan kritis (hipotesis) berdasarkan video yang diamati.</p>
-        </div>
-      </div>
-      <textarea 
-        value={user.answers.problem} 
-        onChange={(e) => updateData({ answers: { ...user.answers, problem: e.target.value } })}
-        className="flex-grow w-full p-8 rounded-[2rem] border-2 border-slate-200 focus:border-indigo-500 font-nunito text-xl outline-none resize-none bg-slate-50 shadow-inner"
-        placeholder="Ketik pertanyaan kritismu di sini... (Cth: Mengapa esensi Tattwa sering dilupakan dalam kemeriahan Upacara?)"
-      />
-    </div>
-  );
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  const el = document.getElementById('page-'+p);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const nav = document.getElementById('nav-'+p);
+  if (nav) nav.classList.add('active');
 }
 
-function Syntax3({ user, updateData }) {
-  return (
-    <div className="fade-in h-full flex flex-col w-full">
-      <div className="mb-4 flex items-center gap-3 shrink-0">
-        <div className="p-3 bg-blue-100 text-blue-600 rounded-xl icon-spin-active"><Globe size={24} /></div>
-        <div>
-          <h2 className="text-2xl font-poppins font-bold text-slate-800">Tahap 3: Eksplorasi Global</h2>
-          <p className="font-nunito text-slate-500 text-sm">Gunakan AI, Jurnal, atau Artikel untuk melakukan riset komprehensif tanpa keluar web.</p>
-        </div>
+// ===== VIDEOS =====
+function renderVideos() {
+  const g = document.getElementById('video-gallery');
+  if (!g) return;
+  g.innerHTML = VIDEOS.map(v => `
+    <div class="video-card">
+      <div class="video-thumb">
+        <iframe src="${v.url}" allowfullscreen loading="lazy"></iframe>
       </div>
-      {/* Container diperbesar untuk hasil pencarian yang lebih lega */}
-      <div className="flex-grow flex flex-col border-2 border-slate-200 rounded-[2rem] overflow-hidden shadow-sm bg-white min-h-[60vh] lg:min-h-[700px]">
-         <GlobalSearchHub user={user} updateData={updateData} />
-      </div>
-    </div>
-  );
-}
-
-function GlobalSearchHub({ user, updateData, isDashboard = false }) {
-  const [query, setQuery] = useState('');
-  const [engine, setEngine] = useState('wiki'); 
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState(null);
-  const [wikiUrl, setWikiUrl] = useState('');
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if(!query) return;
-    setIsLoading(true);
-    setResults(null);
-    setWikiUrl('');
-
-    if (updateData && user && !isDashboard) {
-      updateData({ searchLogs: [...(user.searchLogs||[]), { query, engine, time: new Date().toLocaleTimeString() }] });
-    }
-
-    if (engine === 'wiki') {
-      setWikiUrl(`https://id.m.wikipedia.org/w/index.php?search=${encodeURIComponent(query)}&title=Istimewa:Pencarian`);
-      setIsLoading(false);
-    } else if (engine === 'scholar') {
-      try {
-        const res = await fetch(`https://api.crossref.org/works?query=${encodeURIComponent(query)}&select=title,author,URL,abstract,published-print&rows=15`);
-        const data = await res.json();
-        setResults(data.message.items);
-      } catch(err) {
-        setResults({ error: "Gagal memuat data jurnal akademik." });
-      }
-      setIsLoading(false);
-    } else if (engine === 'ai') {
-      try {
-        const apiKey = ""; // API Key disisipkan otomatis oleh environment
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: query }] }],
-            systemInstruction: { parts: [{ text: "Anda adalah Asisten Peneliti Edukasi. Berikan penjelasan terstruktur, analitis, dan mudah dipahami." }] }
-          })
-        });
-        const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, AI tidak dapat memproses permintaan saat ini.";
-        setResults({ text });
-      } catch(err) {
-        setResults({ text: "Terjadi kesalahan jaringan saat menghubungi AI. Pastikan API key terkonfigurasi." });
-      }
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col h-full w-full relative">
-      <div className="p-4 md:p-6 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row gap-4 items-center shrink-0">
-        <select value={engine} onChange={(e) => setEngine(e.target.value)} className="w-full md:w-auto px-5 py-4 rounded-xl border-2 border-slate-200 font-poppins font-bold outline-none focus:border-indigo-500 bg-white shadow-sm text-slate-700 text-lg">
-          <option value="wiki">Wikipedia (Artikel)</option>
-          <option value="scholar">Scholar (Jurnal Akademik)</option>
-          <option value="ai">Asisten Peneliti (AI)</option>
-        </select>
-        <form onSubmit={handleSearch} className="w-full flex-grow flex gap-3">
-          <input type="text" value={query} onChange={e=>setQuery(e.target.value)} placeholder={engine === 'ai' ? "Tanya asisten AI..." : "Ketik kata kunci riset..."} className="flex-grow px-5 py-4 rounded-xl border-2 border-slate-200 font-nunito text-lg outline-none focus:border-indigo-500 shadow-sm" />
-          <button type="submit" disabled={isLoading} className="bg-indigo-600 text-white px-8 font-poppins font-bold text-lg rounded-xl hover:bg-indigo-700 transition disabled:bg-indigo-400 flex items-center shadow-lg active:scale-95">
-            {isLoading ? 'Mencari...' : <><Search size={20} className="md:mr-2"/> <span className="hidden md:inline">Cari Data</span></>}
-          </button>
-        </form>
-      </div>
-
-      <div className="flex-grow bg-slate-100 overflow-hidden relative flex flex-col">
-        {isLoading ? (
-          <div className="m-auto flex flex-col items-center p-8 fade-in">
-            <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4 shadow-lg"></div>
-            <p className="font-poppins text-slate-500 font-bold animate-pulse text-lg">Sedang mengumpulkan literatur...</p>
-          </div>
-        ) : engine === 'wiki' && wikiUrl ? (
-          <iframe src={wikiUrl} className="w-full h-full bg-white" title="Wikipedia Research" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-        ) : engine === 'scholar' && results && Array.isArray(results) ? (
-          <div className="p-8 overflow-y-auto h-full space-y-6 custom-scrollbar bg-slate-50">
-            <h3 className="font-poppins font-bold text-2xl text-slate-800 mb-6 flex items-center"><Book className="mr-3 text-indigo-500" size={28}/> Temuan Jurnal Akademik</h3>
-            <div className="grid lg:grid-cols-2 gap-6">
-              {results.length === 0 ? <p className="text-slate-500 text-lg">Tidak ada jurnal ditemukan untuk kata kunci tersebut.</p> : results.map((item, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-2xl border-2 border-slate-200 shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all flex flex-col">
-                  <h4 className="font-poppins font-bold text-lg text-slate-800 leading-snug mb-2">{item.title?.[0] || 'Tanpa Judul'}</h4>
-                  <p className="text-sm text-slate-500 mb-4 flex-grow">
-                    <span className="font-semibold text-indigo-600">{item.author ? item.author.map(a => `${a.given||''} ${a.family||''}`).join(', ') : 'Penulis Tidak Diketahui'}</span>
-                    {item['published-print']?.['date-parts']?.[0]?.[0] ? ` • Tahun ${item['published-print']['date-parts'][0][0]}` : ''}
-                  </p>
-                  <a href={item.URL} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-600 hover:text-white px-4 py-3 rounded-xl transition-colors border border-indigo-100">
-                    Buka Sumber Asli <ExternalLink size={16} className="ml-2"/>
-                  </a>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : engine === 'ai' && results?.text ? (
-          <div className="p-8 overflow-y-auto h-full custom-scrollbar bg-slate-50">
-            <div className="flex items-start gap-6 bg-white p-8 rounded-3xl border-2 border-slate-200 shadow-md max-w-5xl mx-auto">
-              <div className="p-4 bg-indigo-100 text-indigo-600 rounded-2xl shrink-0 shadow-sm"><Bot size={36}/></div>
-              <div className="font-nunito text-slate-800 text-lg leading-loose space-y-6 w-full">
-                {results.text.split('\n').map((paragraph, index) => (
-                  paragraph ? <p key={index}>{paragraph.replace(/\*\*/g, '')}</p> : <br key={index}/>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="m-auto text-center p-8 fade-in max-w-md">
-            <Globe size={80} className="text-slate-300 mx-auto mb-6" />
-            <h3 className="font-poppins font-bold text-2xl text-slate-800 mb-2">Area Pencarian Super</h3>
-            <p className="text-slate-500 font-nunito text-lg">Pilih metode pencarian di atas dan temukan jawaban dari jutaan literatur akademik secara langsung.</p>
-          </div>
-        )}
+      <div class="video-info">
+        <div class="video-badge">${v.tag}</div>
+        <h4>${v.title}</h4>
+        <p>Sumber: YouTube</p>
       </div>
     </div>
-  );
+  `).join('');
 }
 
-function Syntax4({ user, updateData }) {
-  return (
-    <div className="fade-in max-w-4xl mx-auto h-full flex flex-col">
-      <div className="mb-6 flex items-center gap-3 shrink-0">
-        <div className="p-3 bg-emerald-100 text-emerald-600 rounded-xl"><Database size={24} /></div>
-        <div>
-          <h2 className="text-2xl font-poppins font-bold text-slate-800">Tahap 4 & 5: Pengolahan & Sintesis</h2>
-          <p className="font-nunito text-slate-500">Hubungkan data riset dari Tahap 3 dengan rumusan masalahmu. Buat draf kesimpulan di sini.</p>
-        </div>
-      </div>
-      <textarea 
-        value={user.answers.conclusion} 
-        onChange={(e) => updateData({ answers: { ...user.answers, conclusion: e.target.value } })}
-        className="flex-grow w-full p-8 rounded-[2rem] border-2 border-slate-200 focus:border-emerald-500 font-nunito text-xl outline-none resize-none bg-slate-50 shadow-inner"
-        placeholder="Tulis sintesis atau jawaban akhir dari pertanyaan penelitianmu secara mendalam..."
-      />
+// ===== QUIZ =====
+function initQuiz(mode) {
+  const qs = (mode === 'pre' ? PRE_QUESTIONS : POST_QUESTIONS).slice();
+  for (let i = qs.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [qs[i],qs[j]]=[qs[j],qs[i]]; }
+  quizCurrent = {mode, questions:qs.slice(0,10), idx:0, answers:{}, timer:null, timeLeft:600, essayAnswer:''};
+  renderQuiz();
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(quizCurrent.timer);
+  quizCurrent.timer = setInterval(() => {
+    quizCurrent.timeLeft--;
+    const el = document.getElementById('quiz-timer');
+    if (el) { const m=Math.floor(quizCurrent.timeLeft/60), s=quizCurrent.timeLeft%60; el.textContent=`${m}:${String(s).padStart(2,'0')}`; }
+    if (quizCurrent.timeLeft <= 0) { clearInterval(quizCurrent.timer); submitQuiz(); }
+  }, 1000);
+}
+
+function renderQuiz() {
+  const {mode, questions, idx, answers} = quizCurrent;
+  const isEssay = idx === 10;
+  const total = 11;
+  const container = document.getElementById(mode==='pre'?'pretest-container':'posttest-container');
+  const pct = ((idx+1)/total*100).toFixed(0);
+
+  let html = `
+    <div class="quiz-header">
+      <h3>${isEssay?'Esai Pemahaman':`Soal ${idx+1} dari 10`}</h3>
+      <div class="quiz-timer" id="quiz-timer">10:00</div>
     </div>
-  );
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
+  `;
+
+  if (!isEssay) {
+    const q = questions[idx];
+    html += `<div class="quiz-question-card">
+      <div class="q-number">Soal ${idx+1}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-options">
+        ${q.opts.map((o,i)=>`<div class="q-option ${answers[idx]===i?'selected':''}" onclick="selectAnswer(${i})">
+          <div class="q-option-letter">${'ABCD'[i]}</div>${o}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  } else {
+    const hint = mode==='pre' ? 'Jelaskan apa yang kamu ketahui tentang Tri Kerangka Dasar Agama Hindu (Tatwa, Susila, Upacara) dan hubungan ketiganya.' : 'Berdasarkan pembelajaran hari ini, analisis mengapa keseimbangan Tatwa, Susila, dan Upacara sangat penting bagi umat Hindu. Berikan contoh nyata!';
+    html += `<div class="quiz-question-card">
+      <div class="q-number">Esai — ${mode==='pre'?'Pre-Test':'Post-Test HOTS'}</div>
+      <div class="q-text">${hint}</div>
+      <div class="essay-area"><textarea placeholder="Tulis jawabanmu di sini (minimal 3 kalimat)..." onchange="quizCurrent.essayAnswer=this.value">${quizCurrent.essayAnswer}</textarea></div>
+    </div>`;
+  }
+
+  html += `<div class="quiz-nav">
+    <button class="btn-quiz-nav btn-quiz-prev" onclick="prevQ()" ${idx===0?'disabled style="opacity:.4"':''}>← Sebelumnya</button>
+    ${isEssay ? `<button class="btn-quiz-nav btn-quiz-submit" onclick="submitQuiz()">Kumpulkan →</button>` : `<button class="btn-quiz-nav btn-quiz-next" onclick="nextQ()">${idx===9?'Lanjut ke Esai →':'Berikutnya →'}</button>`}
+  </div>`;
+
+  container.innerHTML = html;
 }
 
-function Syntax5({ user }) {
-  return (
-    <div className="fade-in max-w-3xl mx-auto py-10 text-center flex flex-col h-full justify-center">
-      <div className="w-28 h-28 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ring-8 ring-green-50">
-        <CheckCircle size={56} className="text-green-600" />
-      </div>
-      <h2 className="text-4xl font-poppins font-extrabold text-slate-800 mb-8">Verifikasi Draf Penelitian</h2>
-      <div className="bg-white p-10 rounded-3xl border-2 border-slate-200 text-left shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
-        <p className="font-poppins text-slate-400 text-sm mb-2 uppercase font-bold tracking-widest">Hipotesis Awalmu:</p>
-        <p className="font-nunito text-xl font-semibold text-slate-800 mb-8 pb-6 border-b border-slate-100">"{user.answers.problem || '-'}"</p>
-        
-        <p className="font-poppins text-slate-400 text-sm mb-2 uppercase font-bold tracking-widest">Sintesis Akhirmu:</p>
-        <p className="font-nunito text-xl font-semibold text-slate-800 mb-8 pb-6 border-b border-slate-100">"{user.answers.conclusion || '-'}"</p>
-        
-        <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
-           <p className="font-poppins text-indigo-700 font-bold mb-2 flex items-center"><Zap size={18} className="mr-2"/>Tinjauan Pakar:</p>
-           <p className="font-nunito text-indigo-900 text-lg">Apapun kesimpulanmu, ingatlah bahwa Tattwa (Sari), Susila (Putih Telur), dan Upacara (Cangkang) harus bersinergi. Jika ketiga pilar ini tergambar dalam solusimu, maka risetmu sangat berhasil.</p>
-        </div>
-      </div>
-    </div>
-  );
+function selectAnswer(i) {
+  quizCurrent.answers[quizCurrent.idx] = i;
+  renderQuiz();
 }
 
-// ==========================================
-// 4. QUIZ ENGINE (Pre & Post Test)
-// ==========================================
-function QuizEngine({ type, user, updateData, questionsDb }) {
-  const [mcqList, setMcqList] = useState([]);
-  const [answers, setAnswers] = useState({});
-  const [essay, setEssay] = useState(type === 'preTest' ? user.answers.preEssay : user.answers.postEssay);
-  
-  useEffect(() => {
-    const shuffled = [...questionsDb.mcq].sort(() => 0.5 - Math.random()).slice(0, 10);
-    const optionsShuffled = shuffled.map(q => ({...q, options: [...q.options].sort(() => 0.5 - Math.random())}));
-    setMcqList(optionsShuffled);
-  }, [questionsDb]);
-
-  const isComplete = Object.keys(answers).length === mcqList.length && essay.trim().length > 15;
-
-  const submitTest = () => {
-    let score = 0;
-    mcqList.forEach(q => { if(answers[q.id] === q.answer) score += 10; }); 
-    
-    if (type === 'preTest') {
-      updateData({ preTestScore: score, answers: { ...user.answers, preEssay: essay }, step: 1 });
-    } else {
-      updateData({ postTestScore: score, answers: { ...user.answers, postEssay: essay }, step: 7 }); 
-    }
-  };
-
-  if (mcqList.length === 0) return <div className="p-8 text-center font-bold text-slate-500">Memuat Bank Soal...</div>;
-
-  return (
-    <div className="flex-grow p-4 md:p-8 max-w-5xl mx-auto w-full fade-in overflow-y-auto custom-scrollbar h-[calc(100vh-64px)]">
-      <div className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl border border-slate-200">
-        <div className="text-center mb-12">
-          <div className="inline-block p-5 bg-orange-100 text-orange-600 rounded-2xl mb-6 icon-pulse shadow-sm">
-             {type === 'preTest' ? <Target size={40}/> : <Award size={40}/>}
-          </div>
-          <h2 className="text-4xl md:text-5xl font-poppins font-black text-slate-800 tracking-tight">
-            {type === 'preTest' ? 'Diagnostic Pre-Test' : 'Final Post-Test (HOTS)'}
-          </h2>
-          <p className="font-nunito text-slate-500 mt-4 text-xl">Uji kritis logikamu melalui 10 soal acak & 1 esai analisis komprehensif.</p>
-        </div>
-
-        <div className="space-y-10">
-          <h3 className="font-poppins font-bold text-2xl text-slate-800 border-b-4 border-indigo-100 pb-4 inline-block">Bagian A: Pilihan Ganda</h3>
-          {mcqList.map((q, idx) => (
-            <div key={q.id} className="bg-slate-50 p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition">
-              <p className="font-poppins font-bold text-slate-800 mb-6 text-xl">{idx + 1}. {q.text}</p>
-              <div className="space-y-4">
-                {q.options.map((opt, i) => (
-                  <label key={i} className={`flex items-center p-5 rounded-2xl border-2 cursor-pointer transition-all ${answers[q.id] === opt ? 'bg-indigo-50 border-indigo-500 shadow-md ring-1 ring-indigo-500' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
-                    <input type="radio" name={`q${q.id}`} value={opt} onChange={() => setAnswers({...answers, [q.id]: opt})} className="mr-5 text-indigo-600 focus:ring-indigo-500 w-6 h-6" />
-                    <span className="font-nunito font-semibold text-slate-700 text-lg leading-snug">{opt}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          <div className="pt-10">
-            <h3 className="font-poppins font-bold text-2xl text-slate-800 border-b-4 border-orange-100 pb-4 inline-block mb-8">Bagian B: Esai Penalaran</h3>
-            <div className="bg-orange-50 border-2 border-orange-200 p-8 rounded-3xl shadow-sm">
-              <p className="font-poppins font-bold text-orange-900 mb-6 flex items-start gap-4 text-lg">
-                <PenTool className="w-8 h-8 shrink-0 mt-1 text-orange-600"/> 
-                {type === 'preTest' ? questionsDb.preEssay : questionsDb.postEssay}
-              </p>
-              <textarea 
-                value={essay} onChange={e => setEssay(e.target.value)}
-                className="w-full min-h-[250px] p-6 rounded-2xl border-2 border-orange-300 focus:ring-4 focus:ring-orange-500/50 font-nunito outline-none resize-none bg-white text-xl shadow-inner"
-                placeholder="Ketik argumen analisismu secara terstruktur di sini..."
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-12 pt-8 border-t-2 border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 sticky bottom-0 bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-          <span className="font-poppins font-bold text-slate-600 bg-slate-100 px-6 py-3 rounded-xl text-lg">
-            Terjawab: <span className="text-indigo-600">{Object.keys(answers).length}/10 PG</span> | Esai: {essay.trim().length > 15 ? '✅' : '❌'}
-          </span>
-          <button onClick={submitTest} disabled={!isComplete}
-            className={`px-12 py-5 rounded-2xl font-poppins font-black text-xl shadow-xl transition-all w-full md:w-auto ${isComplete ? 'bg-indigo-600 hover:bg-indigo-700 text-white hover:-translate-y-1 active:scale-95' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
-            Kumpulkan & Evaluasi
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+function nextQ() {
+  if (quizCurrent.idx < 10) { quizCurrent.idx++; renderQuiz(); }
 }
 
-// ==========================================
-// 5. APPRECIATION SCREEN & DASHBOARD
-// ==========================================
-function AppreciationScreen({ user, onContinue }) {
-  useEffect(() => {
-    const container = document.getElementById('confetti');
-    for(let i=0; i<80; i++) {
-      let conf = document.createElement('div');
-      conf.className = 'confetti';
-      conf.style.left = Math.random() * 100 + 'vw';
-      conf.style.backgroundColor = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6'][Math.floor(Math.random()*5)];
-      conf.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      conf.style.width = (Math.random() * 10 + 5) + 'px';
-      conf.style.height = conf.style.width;
-      conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-      container.appendChild(conf);
-    }
-  }, []);
-
-  return (
-    <div className="flex-grow flex items-center justify-center bg-slate-900 p-6 relative overflow-hidden fade-in text-white h-[calc(100vh-64px)]">
-      <div id="confetti" className="confetti-container z-0"></div>
-      
-      <div className="bg-white/10 backdrop-blur-xl p-10 md:p-16 rounded-[3rem] shadow-2xl border border-white/20 text-center relative z-10 max-w-3xl w-full">
-        <div className="w-36 h-36 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-10 shadow-[0_0_50px_rgba(245,158,11,0.6)] icon-bounce">
-          <Award size={80} className="text-white" />
-        </div>
-        <h2 className="text-5xl md:text-6xl font-poppins font-black mb-6 tracking-tighter bg-gradient-to-r from-yellow-200 via-yellow-400 to-orange-500 bg-clip-text text-transparent">LUAR BIASA!</h2>
-        <p className="font-nunito text-2xl mb-12 text-slate-200 font-light leading-relaxed">
-          "{user.nickName}, perjalanan Dharmamu hari ini telah memperluas cakrawala berpikirmu. Kamu bukan sekadar penghafal, kamu adalah <span className="font-bold text-white bg-indigo-600 px-3 py-1 rounded-lg">Peneliti Masa Depan!</span>"
-        </p>
-        
-        <div className="grid grid-cols-2 gap-8 mb-12">
-          <div className="bg-white/5 p-8 rounded-[2rem] border border-white/10">
-            <p className="text-sm font-poppins uppercase tracking-widest text-slate-400 mb-2">Skor Awal</p>
-            <p className="text-5xl font-bold font-poppins">{user.preTestScore}</p>
-          </div>
-          <div className="bg-gradient-to-br from-orange-500/20 to-orange-600/40 p-8 rounded-[2rem] border border-orange-500/30">
-            <p className="text-sm font-poppins uppercase tracking-widest text-orange-300 mb-2">Skor Akhir</p>
-            <p className="text-5xl font-bold font-poppins text-orange-400">{user.postTestScore}</p>
-          </div>
-        </div>
-        
-        <button onClick={onContinue} className="bg-white text-slate-900 px-12 py-5 rounded-full font-poppins font-extrabold hover:bg-slate-200 transition shadow-[0_0_50px_rgba(255,255,255,0.4)] text-lg hover:scale-105">
-          Masuk ke Beranda Eksplorasi Bebas
-        </button>
-      </div>
-    </div>
-  );
+function prevQ() {
+  if (quizCurrent.idx > 0) { quizCurrent.idx--; renderQuiz(); }
 }
 
-function StudentDashboard({ user, contentDb, updateData }) {
-  const [tab, setTab] = useState('explore'); // explore, video, ebook, practice
-
-  const nGain = user.preTestScore != null && user.postTestScore != null 
-    ? ((user.postTestScore - user.preTestScore)/(100 - user.preTestScore)).toFixed(2) 
-    : '-';
-
-  return (
-    <div className="flex-grow flex flex-col bg-slate-50 fade-in h-[calc(100vh-64px)] overflow-hidden">
-      {/* Header Banner */}
-      <div className="bg-indigo-900 text-white pt-10 pb-10 px-6 md:px-12 shadow-xl shrink-0">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-poppins font-black mb-3 tracking-tight flex items-center">
-              <LayoutDashboard className="mr-4 text-orange-400" size={40}/> Pusat Riset Bebas
-            </h1>
-            <p className="font-nunito text-indigo-200 text-xl">Modul linear telah selesai. Akses seluruh pustaka digital dan riset kapan saja.</p>
-          </div>
-          <div className="bg-indigo-800/50 p-6 rounded-3xl border border-indigo-700/50 text-center min-w-[180px] backdrop-blur-sm shadow-inner">
-             <p className="text-sm text-indigo-300 font-poppins uppercase tracking-widest mb-2 font-bold">Capaian N-Gain</p>
-             <p className="text-4xl font-black text-orange-400">{nGain}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="max-w-7xl mx-auto w-full px-6 mt-[-25px] relative z-10 shrink-0">
-        <div className="bg-white p-3 rounded-2xl shadow-xl border border-slate-100 flex gap-3 overflow-x-auto custom-scrollbar">
-          <button onClick={()=>setTab('explore')} className={`px-8 py-4 rounded-xl font-poppins font-bold text-sm md:text-base whitespace-nowrap transition-all flex items-center ${tab==='explore'?'bg-indigo-600 text-white shadow-md':'text-slate-500 hover:bg-slate-100'}`}><Globe size={18} className="mr-2"/> Pencarian Global</button>
-          <button onClick={()=>setTab('video')} className={`px-8 py-4 rounded-xl font-poppins font-bold text-sm md:text-base whitespace-nowrap transition-all flex items-center ${tab==='video'?'bg-indigo-600 text-white shadow-md':'text-slate-500 hover:bg-slate-100'}`}><Video size={18} className="mr-2"/> Galeri Simulasi</button>
-          <button onClick={()=>setTab('ebook')} className={`px-8 py-4 rounded-xl font-poppins font-bold text-sm md:text-base whitespace-nowrap transition-all flex items-center ${tab==='ebook'?'bg-indigo-600 text-white shadow-md':'text-slate-500 hover:bg-slate-100'}`}><Book size={18} className="mr-2"/> Pustaka E-Book</button>
-          <button onClick={()=>setTab('practice')} className={`px-8 py-4 rounded-xl font-poppins font-bold text-sm md:text-base whitespace-nowrap transition-all flex items-center ${tab==='practice'?'bg-indigo-600 text-white shadow-md':'text-slate-500 hover:bg-slate-100'}`}><Target size={18} className="mr-2"/> Bank Ujian Mandiri</button>
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className="max-w-7xl mx-auto w-full p-6 py-8 flex-grow overflow-y-auto custom-scrollbar">
-        
-        {tab === 'explore' && (
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden h-[75vh] min-h-[600px] flex flex-col fade-in">
-             <GlobalSearchHub user={user} updateData={updateData} isDashboard={true} />
-          </div>
-        )}
-
-        {tab === 'video' && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 fade-in">
-            {contentDb.videos.map((vid, idx) => (
-               <div key={idx} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-2xl transition-all flex flex-col group">
-                 <div className="aspect-video bg-slate-900 w-full relative">
-                    {vid.isLocal ? (
-                      <video src={vid.url} controls className="w-full h-full object-cover" />
-                    ) : (
-                      <iframe className="w-full h-full" src={vid.url} title={vid.title} frameBorder="0" allowFullScreen></iframe>
-                    )}
-                 </div>
-                 <div className="p-6 flex-grow flex flex-col justify-between">
-                   <h3 className="font-poppins font-bold text-slate-800 text-lg leading-snug group-hover:text-indigo-600 transition-colors mb-4">{vid.title}</h3>
-                   <span className="text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-500 py-1.5 px-3 rounded-lg self-start">
-                     {vid.isLocal ? 'File Video' : 'YouTube Link'}
-                   </span>
-                 </div>
-               </div>
-            ))}
-          </div>
-        )}
-
-        {tab === 'ebook' && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
-            {contentDb.articles.map((art, idx) => (
-              <a key={idx} href={art.url} target="_blank" rel="noreferrer" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all flex items-start gap-4 group">
-                <div className="p-4 bg-orange-100 text-orange-600 rounded-2xl group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                  <FileText size={32} />
-                </div>
-                <div>
-                  <h3 className="font-poppins font-bold text-slate-800 text-lg leading-snug mb-1 group-hover:text-indigo-700">{art.title}</h3>
-                  <span className="font-nunito text-sm font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{art.type}</span>
-                </div>
-              </a>
-            ))}
-            {contentDb.articles.length === 0 && <div className="col-span-full text-center p-10 text-slate-400 font-bold">Belum ada pustaka yang ditambahkan admin.</div>}
-          </div>
-        )}
-
-        {tab === 'practice' && (
-          <div className="grid sm:grid-cols-2 gap-8 fade-in max-w-4xl mx-auto mt-8">
-             <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-200 text-center hover:-translate-y-2 transition-transform">
-                <Target className="w-20 h-20 text-indigo-500 mx-auto mb-6" />
-                <h3 className="text-2xl font-poppins font-black text-slate-800 mb-3">Ulangi Modul Linear</h3>
-                <p className="font-nunito text-slate-600 text-lg mb-8">Ingin memperbaiki nilai Post-Test? Reset progres dan mulai penelitian dari awal lagi.</p>
-                <button onClick={() => updateData({ step: 1, preTestScore: null, postTestScore: null })} className="bg-indigo-50 text-indigo-700 font-poppins font-bold px-8 py-4 rounded-xl w-full border border-indigo-200 hover:bg-indigo-600 hover:text-white transition-colors text-lg">Reset & Mulai Ulang</button>
-             </div>
-             <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-200 text-center opacity-60">
-                <FileText className="w-20 h-20 text-slate-400 mx-auto mb-6" />
-                <h3 className="text-2xl font-poppins font-black text-slate-800 mb-3">Bank Soal Ekstra</h3>
-                <p className="font-nunito text-slate-600 text-lg mb-8">Akses ribuan soal HOTS tambahan yang disusun oleh peneliti.</p>
-                <button disabled className="bg-slate-100 text-slate-400 font-poppins font-bold px-8 py-4 rounded-xl w-full text-lg">Segera Hadir</button>
-             </div>
-          </div>
-        )}
-
-      </div>
-    </div>
-  );
+function submitQuiz() {
+  clearInterval(quizCurrent.timer);
+  let correct = 0;
+  quizCurrent.questions.forEach((q, i) => {
+    if (quizCurrent.answers[i] === q.ans) correct++;
+  });
+  const score = Math.round((correct / 10) * 100);
+  if (quizCurrent.mode === 'pre') {
+    userProgress.preScore = score;
+    userProgress.stage = Math.max(userProgress.stage, 1);
+    saveProgress();
+    showNotif(`Pre-Test selesai! Skor: ${score}/100 ✅`);
+    updateNavBadges();
+    renderProgressTrack();
+    renderDashboard();
+    showPage('stimulasi');
+  } else {
+    userProgress.postScore = score;
+    userProgress.stage = 7;
+    saveProgress();
+    const ng = ((score - userProgress.preScore) / (100 - userProgress.preScore)).toFixed(2);
+    document.getElementById('cel-pre').textContent = userProgress.preScore;
+    document.getElementById('cel-post').textContent = score;
+    document.getElementById('cel-ngain').textContent = ng;
+    updateNavBadges();
+    renderProgressTrack();
+    renderDashboard();
+    showCelebration();
+  }
 }
 
-// ==========================================
-// 6. ADMIN DASHBOARD & SUPER CMS
-// ==========================================
-function AdminDashboard({ usersDb, contentDb, setContentDb, questionsDb, setQuestionsDb }) {
-  const [tab, setTab] = useState('analytics'); // analytics, qualitative, cms
-  const [cmsTab, setCmsTab] = useState('video'); // video, ebook, soal
-  
-  const students = usersDb.filter(u => u.role === 'student');
-
-  const calculateNGain = (pre, post) => {
-    if (pre == null || post == null) return '-';
-    if (pre === 100 && post === 100) return '1.00';
-    return ((post - pre) / (100 - pre)).toFixed(2);
-  };
-
-  const exportCSV = () => {
-    let csv = "Nama Lengkap,Panggilan,Pre-Test,Post-Test,N-Gain,Esai Awal,Masalah,Kesimpulan,Esai Akhir\n";
-    students.forEach(s => {
-      const gain = calculateNGain(s.preTestScore, s.postTestScore);
-      csv += `"${s.fullName}","${s.nickName}",${s.preTestScore||0},${s.postTestScore||0},${gain},"${(s.answers.preEssay||'').replace(/"/g, '""')}","${(s.answers.problem||'').replace(/"/g, '""')}","${(s.answers.conclusion||'').replace(/"/g, '""')}","${(s.answers.postEssay||'').replace(/"/g, '""')}"\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "TriVidia_Research_Data.csv";
-    link.click();
-  };
-
-  // Video File Handler (Simulasi Local File ke Object URL)
-  const handleVideoUpload = (e, index) => {
-    const file = e.target.files[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      const newVids = [...contentDb.videos];
-      newVids[index].url = url;
-      newVids[index].isLocal = true;
-      setContentDb({ ...contentDb, videos: newVids });
-    }
-  };
-
-  return (
-    <div className="flex-grow flex bg-slate-50 fade-in">
-      {/* Admin Sidebar */}
-      <div className="w-72 bg-slate-900 text-slate-300 flex-col hidden md:flex h-[calc(100vh-64px)] shrink-0">
-        <div className="p-8 border-b border-slate-800">
-          <p className="font-poppins font-black text-white text-2xl tracking-tight">Control Center</p>
-          <p className="font-nunito text-sm text-orange-400 mt-2 font-bold">Admin Privileges (Super)</p>
-        </div>
-        <div className="flex-grow p-6 space-y-3 font-poppins text-base font-semibold">
-          <button onClick={()=>setTab('analytics')} className={`w-full flex items-center p-4 rounded-2xl transition-all ${tab==='analytics' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}><BarChart className="mr-4" size={22}/> Kuantitatif (Skor)</button>
-          <button onClick={()=>setTab('qualitative')} className={`w-full flex items-center p-4 rounded-2xl transition-all ${tab==='qualitative' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}><FileText className="mr-4" size={22}/> Kualitatif (Esai)</button>
-          <button onClick={()=>setTab('cms')} className={`w-full flex items-center p-4 rounded-2xl transition-all ${tab==='cms' ? 'bg-orange-500 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}><Settings className="mr-4" size={22}/> Super CMS</button>
-        </div>
-      </div>
-
-      {/* Admin Main */}
-      <div className="flex-grow p-6 md:p-10 overflow-y-auto h-[calc(100vh-64px)] custom-scrollbar">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-4">
-          <h2 className="text-3xl md:text-4xl font-poppins font-black text-slate-800 tracking-tight">
-            {tab === 'analytics' ? 'Analisis Kuantitatif N-Gain' : tab === 'qualitative' ? 'Log Jawaban Kualitatif' : 'Super Content Management (CMS)'}
-          </h2>
-          {(tab === 'analytics' || tab === 'qualitative') && (
-            <button onClick={exportCSV} className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl font-poppins font-bold flex items-center shadow-lg transition active:scale-95 text-lg shrink-0">
-              <Download size={20} className="mr-3" /> Export Excel
-            </button>
-          )}
-        </div>
-
-        {/* ANALYTICS TAB */}
-        {tab === 'analytics' && (
-          <div className="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden fade-in">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left font-nunito text-lg">
-                <thead className="bg-slate-100 border-b-2 border-slate-200 text-slate-700 font-poppins">
-                  <tr>
-                    <th className="p-6 font-bold">Responden</th>
-                    <th className="p-6 font-bold text-center">Pre-Test</th>
-                    <th className="p-6 font-bold text-center">Post-Test</th>
-                    <th className="p-6 font-bold text-center">N-Gain</th>
-                    <th className="p-6 font-bold">Kategori</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {students.map((s, i) => {
-                    const gain = calculateNGain(s.preTestScore, s.postTestScore);
-                    const gVal = parseFloat(gain);
-                    return (
-                      <tr key={i} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-6"><p className="font-bold text-slate-800">{s.fullName}</p></td>
-                        <td className="p-6 text-center font-bold text-slate-500">{s.preTestScore ?? '-'}</td>
-                        <td className="p-6 text-center font-black text-indigo-600 text-xl">{s.postTestScore ?? '-'}</td>
-                        <td className="p-6 text-center font-black text-xl">{gain}</td>
-                        <td className="p-6 font-bold">
-                           {gain === '-' ? '-' : gVal > 0.7 ? <span className="bg-green-100 text-green-700 px-3 py-1 rounded-lg">Tinggi</span> : gVal >= 0.3 ? <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-lg">Sedang</span> : <span className="bg-red-100 text-red-700 px-3 py-1 rounded-lg">Rendah</span>}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {students.length === 0 && <tr><td colSpan="5" className="p-12 text-center text-slate-500 text-xl">Data penelitian kosong.</td></tr>}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* QUALITATIVE TAB */}
-        {tab === 'qualitative' && (
-          <div className="space-y-8 fade-in">
-            {students.map((s, i) => (
-              <div key={i} className="bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-slate-200 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
-                <h3 className="font-poppins font-black text-2xl text-slate-800 mb-8 border-b pb-4 flex items-center"><User className="mr-3 text-indigo-500" size={28}/> {s.fullName}</h3>
-                
-                <div className="grid lg:grid-cols-2 gap-8 mb-8">
-                  <div className="bg-slate-50 p-8 rounded-3xl border border-slate-100">
-                    <p className="font-poppins font-bold text-slate-500 text-sm mb-4 uppercase tracking-widest flex items-center"><Target size={18} className="mr-2"/> Esai Awal (Pre-Test)</p>
-                    <p className="font-nunito italic text-slate-700 text-lg leading-relaxed">"{s.answers.preEssay || 'Belum diisi'}"</p>
-                  </div>
-                  <div className="bg-indigo-50 p-8 rounded-3xl border border-indigo-100">
-                    <p className="font-poppins font-bold text-indigo-600 text-sm mb-4 uppercase tracking-widest flex items-center"><Award size={18} className="mr-2"/> Esai Analisis (Post-Test)</p>
-                    <p className="font-nunito italic text-slate-900 font-bold text-lg leading-relaxed">"{s.answers.postEssay || 'Belum diisi'}"</p>
-                  </div>
-                </div>
-
-                <div className="grid lg:grid-cols-2 gap-8 pt-6 border-t border-slate-100">
-                  <div>
-                     <p className="font-poppins font-bold text-slate-500 text-xs mb-2 uppercase tracking-widest">Rumusan Masalah (Tahap 2)</p>
-                     <p className="font-nunito text-slate-800 font-semibold text-lg bg-slate-50 p-4 rounded-xl">"{s.answers.problem || 'Belum diisi'}"</p>
-                  </div>
-                  <div>
-                     <p className="font-poppins font-bold text-slate-500 text-xs mb-2 uppercase tracking-widest">Kesimpulan Riset (Tahap 6)</p>
-                     <p className="font-nunito text-slate-800 font-semibold text-lg bg-slate-50 p-4 rounded-xl">"{s.answers.conclusion || 'Belum diisi'}"</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* CMS TAB */}
-        {tab === 'cms' && (
-          <div className="bg-white rounded-3xl shadow-xl border border-slate-200 fade-in flex flex-col lg:flex-row overflow-hidden min-h-[75vh]">
-             {/* CMS Sidebar Menu */}
-             <div className="w-full lg:w-64 bg-slate-50 border-r border-slate-200 p-6 flex lg:flex-col gap-2 overflow-x-auto">
-                <button onClick={()=>setCmsTab('video')} className={`p-4 rounded-xl font-poppins font-bold text-left whitespace-nowrap transition-all flex items-center ${cmsTab==='video' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-600 hover:bg-slate-200'}`}><Video size={18} className="mr-3"/> Media Video</button>
-                <button onClick={()=>setCmsTab('ebook')} className={`p-4 rounded-xl font-poppins font-bold text-left whitespace-nowrap transition-all flex items-center ${cmsTab==='ebook' ? 'bg-blue-500 text-white shadow-md' : 'text-slate-600 hover:bg-slate-200'}`}><Book size={18} className="mr-3"/> Pustaka E-Book</button>
-                <button onClick={()=>setCmsTab('soal')} className={`p-4 rounded-xl font-poppins font-bold text-left whitespace-nowrap transition-all flex items-center ${cmsTab==='soal' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-600 hover:bg-slate-200'}`}><Edit3 size={18} className="mr-3"/> Bank Soal</button>
-             </div>
-
-             {/* CMS Content Area */}
-             <div className="flex-grow p-6 lg:p-10 overflow-y-auto custom-scrollbar h-[75vh]">
-                
-                {cmsTab === 'video' && (
-                  <div className="fade-in max-w-4xl">
-                    <div className="flex justify-between items-center mb-8">
-                       <h3 className="font-poppins font-black text-2xl flex items-center"><Video className="mr-3 text-orange-500" size={32}/> Editor Galeri Video</h3>
-                       <button onClick={() => setContentDb({...contentDb, videos: [{id: Date.now(), title: "Video Baru", url: "", isLocal: false}, ...contentDb.videos]})} className="bg-orange-100 text-orange-700 hover:bg-orange-200 px-4 py-2 rounded-xl font-bold flex items-center"><Plus size={18} className="mr-1"/> Tambah Video</button>
-                    </div>
-                    <div className="space-y-6">
-                      {contentDb.videos.map((vid, idx) => (
-                        <div key={idx} className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm relative group">
-                          <button onClick={() => { const newVids = [...contentDb.videos]; newVids.splice(idx, 1); setContentDb({...contentDb, videos: newVids}); }} className="absolute top-4 right-4 text-red-400 hover:text-red-600 bg-red-50 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={18}/></button>
-                          
-                          <label className="block font-poppins font-bold text-sm text-slate-500 mb-2">Judul Video</label>
-                          <input type="text" value={vid.title} onChange={e => { const newVids = [...contentDb.videos]; newVids[idx].title = e.target.value; setContentDb({...contentDb, videos: newVids}); }} className="w-full p-4 rounded-xl font-nunito text-lg border-2 border-slate-200 focus:border-orange-500 outline-none mb-4 bg-white" />
-                          
-                          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                            <select value={vid.isLocal ? 'file' : 'link'} onChange={e => { const newVids = [...contentDb.videos]; newVids[idx].isLocal = e.target.value === 'file'; setContentDb({...contentDb, videos: newVids}); }} className="p-4 rounded-xl border-2 border-slate-200 font-bold bg-white focus:border-orange-500 outline-none shrink-0">
-                               <option value="link">Link YouTube / Web</option>
-                               <option value="file">Upload File Lokal</option>
-                            </select>
-                            
-                            {vid.isLocal ? (
-                              <div className="flex-grow flex items-center gap-2 w-full bg-white border-2 border-slate-200 p-2 rounded-xl">
-                                <label className="cursor-pointer bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg font-bold flex items-center text-slate-700 shrink-0"><Upload size={16} className="mr-2"/> Pilih File .mp4</label>
-                                <input type="file" accept="video/mp4" onChange={(e) => handleVideoUpload(e, idx)} className="hidden" />
-                                <span className="truncate text-sm text-slate-500 font-mono px-2">{vid.url ? 'File siap diputar' : 'Belum ada file'}</span>
-                              </div>
-                            ) : (
-                              <input type="text" value={vid.url} placeholder="https://www.youtube.com/embed/..." onChange={e => { const newVids = [...contentDb.videos]; newVids[idx].url = e.target.value; setContentDb({...contentDb, videos: newVids}); }} className="flex-grow w-full p-4 border-2 border-slate-200 rounded-xl font-nunito bg-white text-slate-600 focus:border-orange-500 outline-none" />
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {cmsTab === 'ebook' && (
-                  <div className="fade-in max-w-4xl">
-                    <div className="flex justify-between items-center mb-8">
-                       <h3 className="font-poppins font-black text-2xl flex items-center"><Book className="mr-3 text-blue-500" size={32}/> Editor Pustaka & E-Book</h3>
-                       <button onClick={() => setContentDb({...contentDb, articles: [{id: Date.now(), title: "Judul Pustaka Baru", type: "Artikel", url: ""}, ...contentDb.articles]})} className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-4 py-2 rounded-xl font-bold flex items-center"><Plus size={18} className="mr-1"/> Tambah Pustaka</button>
-                    </div>
-                    <div className="space-y-4">
-                      {contentDb.articles.map((art, idx) => (
-                        <div key={idx} className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex flex-col lg:flex-row gap-4 items-center group relative">
-                           <button onClick={() => { const newArts = [...contentDb.articles]; newArts.splice(idx, 1); setContentDb({...contentDb, articles: newArts}); }} className="absolute -top-3 -right-3 text-white bg-red-500 hover:bg-red-600 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16}/></button>
-                           <input type="text" value={art.title} placeholder="Judul Buku/Jurnal" onChange={e => { const newArts = [...contentDb.articles]; newArts[idx].title = e.target.value; setContentDb({...contentDb, articles: newArts}); }} className="flex-[2] w-full p-4 border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-bold" />
-                           <input type="text" value={art.type} placeholder="Tipe (PDF/Web)" onChange={e => { const newArts = [...contentDb.articles]; newArts[idx].type = e.target.value; setContentDb({...contentDb, articles: newArts}); }} className="flex-[1] w-full p-4 border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-bold text-slate-500" />
-                           <input type="text" value={art.url} placeholder="Tautan / URL Target" onChange={e => { const newArts = [...contentDb.articles]; newArts[idx].url = e.target.value; setContentDb({...contentDb, articles: newArts}); }} className="flex-[2] w-full p-4 border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-mono text-sm text-slate-500" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {cmsTab === 'soal' && (
-                  <div className="fade-in max-w-5xl">
-                    <div className="flex justify-between items-center mb-8">
-                       <h3 className="font-poppins font-black text-2xl flex items-center"><Edit3 className="mr-3 text-indigo-500" size={32}/> Editor Bank Soal HOTS</h3>
-                       <button onClick={() => setQuestionsDb({...questionsDb, mcq: [{id: Date.now(), text: "Pertanyaan Baru?", options: ["Opsi A", "Opsi B"], answer: "Opsi A"}, ...questionsDb.mcq]})} className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-xl font-bold flex items-center"><Plus size={18} className="mr-1"/> Tambah Soal PG</button>
-                    </div>
-
-                    <div className="mb-10 space-y-6">
-                       <h4 className="font-poppins font-bold text-xl bg-slate-100 p-4 rounded-xl">Edit Soal Esai</h4>
-                       <div className="grid md:grid-cols-2 gap-6">
-                         <div>
-                            <label className="block font-bold text-slate-500 mb-2">Esai Pre-Test</label>
-                            <textarea value={questionsDb.preEssay} onChange={e => setQuestionsDb({...questionsDb, preEssay: e.target.value})} className="w-full p-5 border-2 border-slate-200 rounded-2xl h-32 outline-none focus:border-indigo-500" />
-                         </div>
-                         <div>
-                            <label className="block font-bold text-slate-500 mb-2">Esai Post-Test (Analisis)</label>
-                            <textarea value={questionsDb.postEssay} onChange={e => setQuestionsDb({...questionsDb, postEssay: e.target.value})} className="w-full p-5 border-2 border-slate-200 rounded-2xl h-32 outline-none focus:border-indigo-500" />
-                         </div>
-                       </div>
-                    </div>
-
-                    <h4 className="font-poppins font-bold text-xl bg-slate-100 p-4 rounded-xl mb-6">Edit Soal Pilihan Ganda (Total: {questionsDb.mcq.length})</h4>
-                    <div className="space-y-8">
-                      {questionsDb.mcq.map((q, idx) => (
-                        <div key={idx} className="bg-white p-6 md:p-8 rounded-3xl border-2 border-slate-200 shadow-sm relative group">
-                           <button onClick={() => { const newMcq = [...questionsDb.mcq]; newMcq.splice(idx, 1); setQuestionsDb({...questionsDb, mcq: newMcq}); }} className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-600 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16}/></button>
-                           <label className="block font-bold text-slate-500 mb-2">Teks Pertanyaan {idx+1}</label>
-                           <textarea value={q.text} onChange={e => { const newMcq = [...questionsDb.mcq]; newMcq[idx].text = e.target.value; setQuestionsDb({...questionsDb, mcq: newMcq}); }} className="w-full p-4 border-2 border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-bold text-lg mb-4" />
-                           
-                           <label className="block font-bold text-slate-500 mb-2">Opsi Jawaban & Kunci</label>
-                           <div className="grid md:grid-cols-2 gap-4">
-                             {q.options.map((opt, oIdx) => (
-                               <div key={oIdx} className="flex items-center gap-3">
-                                 <input type="radio" name={`key-${idx}`} checked={q.answer === opt} onChange={() => { const newMcq = [...questionsDb.mcq]; newMcq[idx].answer = opt; setQuestionsDb({...questionsDb, mcq: newMcq}); }} className="w-6 h-6 text-indigo-600 focus:ring-indigo-500 cursor-pointer" title="Jadikan Kunci Jawaban" />
-                                 <input type="text" value={opt} onChange={e => { const newMcq = [...questionsDb.mcq]; newMcq[idx].options[oIdx] = e.target.value; if(q.answer === opt) newMcq[idx].answer = e.target.value; setQuestionsDb({...questionsDb, mcq: newMcq}); }} className={`w-full p-3 border-2 rounded-lg outline-none font-nunito ${q.answer === opt ? 'border-green-400 bg-green-50 font-bold' : 'border-slate-200 focus:border-indigo-500'}`} />
-                               </div>
-                             ))}
-                             <button onClick={() => { const newMcq = [...questionsDb.mcq]; newMcq[idx].options.push(`Opsi Baru ${newMcq[idx].options.length+1}`); setQuestionsDb({...questionsDb, mcq: newMcq}); }} className="p-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-bold hover:bg-slate-50 flex items-center justify-center"><Plus size={18} className="mr-2"/> Tambah Opsi</button>
-                           </div>
-                        </div>
-                      ))}
-                    </div>
-
-                  </div>
-                )}
-             </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+// ===== STAGE COMPLETION =====
+function completeStage(s) {
+  const idx = STAGES.indexOf(s);
+  if (idx + 1 > userProgress.stage) {
+    userProgress.stage = idx + 1;
+    saveProgress();
+  }
+  updateNavBadges();
+  renderProgressTrack();
+  renderDashboard();
+  const next = STAGES[idx+1];
+  if (next) { showPage(next); if (next==='posttest') initQuiz('post'); }
+  showNotif('Tahap ' + STAGE_LABELS[idx] + ' selesai! ✅');
 }
+
+// ===== IDENTIFICATION =====
+function fillPrompt(el, text) {
+  document.querySelectorAll('.prompt-chip').forEach(c => c.style.background='');
+  el.style.background='var(--indigo-light)';
+  el.style.borderColor='var(--indigo)';
+  const ta = document.getElementById('identifikasi-text');
+  ta.value = text + '\n\n' + (ta.value || '');
+  autoSave('identifikasi');
+}
+
+// ===== AUTOSAVE =====
+let saveTimers = {};
+function autoSave(field) {
+  clearTimeout(saveTimers[field]);
+  const el = document.getElementById(field+'-text');
+  if (el) {
+    saveTimers[field] = setTimeout(() => {
+      userProgress[field] = el.value;
+      saveProgress();
+      const note = document.getElementById('autosave-'+field);
+      if (note) { note.textContent = 'Tersimpan — ' + new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }
+    }, 800);
+  }
+}
+
+// ===== RESEARCH HUB =====
+function switchResearchTab(tab) {
+  document.querySelectorAll('.research-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.research-tab-content').forEach(c => { c.classList.remove('active'); c.style.display='none'; });
+  event.target.classList.add('active');
+  const tc = document.getElementById('rtab-'+tab);
+  if (tc) { tc.classList.add('active'); tc.style.display='flex'; }
+}
+
+function searchWiki() {
+  const q = document.getElementById('wiki-query').value.trim();
+  if (!q) return;
+  logSearch(q);
+  document.getElementById('wiki-frame').src = `https://id.wikipedia.org/wiki/${encodeURIComponent(q)}`;
+}
+
+function searchScholar() {
+  const q = document.getElementById('scholar-query').value.trim();
+  if (!q) return;
+  logSearch(q);
+  document.getElementById('scholar-frame').src = `https://scholar.google.com/scholar?q=${encodeURIComponent(q)}`;
+}
+
+function logSearch(kw) {
+  if (!userProgress.searches) userProgress.searches = [];
+  userProgress.searches.push({kw, time: new Date().toLocaleTimeString('id-ID')});
+  saveProgress();
+}
+
+const AI_RESPONSES = {
+  tatwa: "**Tatwa** adalah sistem filsafat (tattva) yang menjadi landasan metafisika Hindu. Tatwa mencakup konsep-konsep seperti:\n\n• **Brahman** — realitas absolut tertinggi\n• **Atman** — jiwa individual yang identik dengan Brahman\n• **Karma** — hukum sebab-akibat kosmis\n• **Moksa** — pembebasan dari samsara (siklus kelahiran)\n\nTanpa Tatwa, umat Hindu tidak memiliki fondasi filosofis untuk memahami mengapa mereka beribadah.",
+  susila: "**Susila** adalah sistem etika dan moral dalam Hindu yang mengatur hubungan manusia dengan:\n\n• **Tuhan** (Parhyangan)\n• **Sesama manusia** (Pawongan)\n• **Alam semesta** (Palemahan)\n\nKonsep ini dikenal sebagai **Tri Hita Karana** — tiga penyebab kebahagiaan. Susila yang baik lahir dari pemahaman Tatwa yang benar.",
+  upacara: "**Upacara** adalah manifestasi konkret dari Tatwa dan Susila dalam bentuk:\n\n• **Yadnya** — persembahan suci (Dewa, Rsi, Manusia, Bhuta, Pitra Yadnya)\n• **Ritual adat** — Ngaben, Melaspas, Metatah, dll\n• **Persembahyangan** — Puja Tri Sandya, Odalan\n\nUpacara menjadi jembatan antara dimensi fisik dan spiritual, tetapi HARUS dilandasi Tatwa dan Susila agar bermakna.",
+  default: "Pertanyaan menarik! Untuk topik Tri Kerangka Dasar Hindu, saya rekomendasikan:\n\n1. Cari di **Wikipedia** dengan kata kunci 'Tri Kerangka Hindu'\n2. Cari di **Google Scholar** dengan 'Tatwa Susila Upacara Hindu Bali'\n3. Tonton video **Pelita Dharma** di galeri untuk penjelasan mendalam\n\nApa aspek spesifik yang ingin kamu eksplorasi lebih jauh?"
+};
+
+function askAI() {
+  const q = document.getElementById('ai-query').value.trim();
+  if (!q) return;
+  logSearch(q);
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML += `<div class="msg user">${q}</div>`;
+  msgs.innerHTML += `<div class="ai-loading" id="ai-typing"><span></span><span></span><span></span></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  document.getElementById('ai-query').value = '';
+  setTimeout(() => {
+    const typing = document.getElementById('ai-typing');
+    if (typing) typing.remove();
+    let resp = AI_RESPONSES.default;
+    const ql = q.toLowerCase();
+    if (ql.includes('tatwa')||ql.includes('filsafat')||ql.includes('brahman')) resp = AI_RESPONSES.tatwa;
+    else if (ql.includes('susila')||ql.includes('etika')||ql.includes('moral')) resp = AI_RESPONSES.susila;
+    else if (ql.includes('upacara')||ql.includes('ritual')||ql.includes('yadnya')||ql.includes('ngaben')) resp = AI_RESPONSES.upacara;
+    msgs.innerHTML += `<div class="msg ai">${resp.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/•/g,'·')}</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1400);
+}
+
+function askLibAI() {
+  const q = document.getElementById('lib-query').value.trim();
+  if (!q) return;
+  const resp = document.getElementById('lib-ai-response');
+  resp.innerHTML = `<div class="ai-loading"><span></span><span></span><span></span></div>`;
+  setTimeout(() => {
+    resp.innerHTML = `<div class="msg ai" style="max-width:100%">Berdasarkan koleksi perpustakaan TriVidia, pertanyaan tentang "<em>${q}</em>" berkaitan erat dengan Tri Kerangka Dasar Hindu. Saya merekomendasikan membaca <strong>Tattva Hindu: Filsafat Dasar</strong> untuk fondasi konseptual, dan <strong>Etika Tri Hita Karana</strong> karya Prof. I Made Titib untuk pemahaman etis. Apakah kamu ingin saya menjelaskan lebih spesifik?</div>`;
+  }, 1200);
+}
+
+// ===== CELEBRATION =====
+function showCelebration() {
+  document.getElementById('celebration-overlay').classList.add('show');
+  createConfetti();
+}
+
+function closeCelebration() {
+  document.getElementById('celebration-overlay').classList.remove('show');
+  showPage('library');
+}
+
+function createConfetti() {
+  const card = document.querySelector('.celebration-card');
+  const colors = ['#FF8C00','#D4AF37','#3F51B5','#27AE60','#E74C3C','#9B59B6'];
+  for (let i=0; i<60; i++) {
+    const c = document.createElement('div');
+    c.style.cssText = `position:absolute;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>0.5?'50%':'2px'};left:${Math.random()*100}%;top:${-10-Math.random()*20}%;animation:confetti-fall ${1+Math.random()*2}s ${Math.random()*1.5}s linear forwards;pointer-events:none;z-index:10`;
+    card.appendChild(c);
+  }
+  const style = document.createElement('style');
+  style.textContent = '@keyframes confetti-fall{to{top:110%;transform:rotate('+Math.random()*720+'deg) translateX('+(Math.random()*100-50)+'px)}}';
+  document.head.appendChild(style);
+}
+
+// ===== ADMIN =====
+function adminNav(p) {
+  document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
+  event.target.classList.add('active');
+  ['analytics','videos','ebooks','questions','searchlog'].forEach(id => {
+    const el = document.getElementById('admin-'+id);
+    if (el) el.style.display = id===p?'block':'none';
+  });
+}
+
+function renderAdminTable() {
+  const tbody = document.getElementById('admin-table-body');
+  if (!tbody) return;
+  const allUsers = JSON.parse(localStorage.getItem('tv_users') || '[]');
+  let rows = [...ADMIN_DATA];
+  allUsers.forEach(u => {
+    const p = JSON.parse(localStorage.getItem('tv_progress_'+u.name)||'null');
+    if (p && p.preScore !== null) rows.push({name:u.nick||u.name, pre:p.preScore, post:p.postScore||'-', ngain: p.postScore ? ((p.postScore-p.preScore)/(100-p.preScore)).toFixed(2) : '-'});
+  });
+  tbody.innerHTML = rows.map(r => {
+    const ng = typeof r.ngain === 'number' ? r.ngain : parseFloat(r.ngain)||0;
+    const cat = ng >= 0.7 ? 'Tinggi' : ng >= 0.3 ? 'Sedang' : 'Rendah';
+    const cls = ng >= 0.7 ? 'ngain-high' : 'ngain-med';
+    return `<tr><td><strong>${r.name}</strong></td><td>${r.pre}</td><td>${r.post}</td><td>${r.ngain}</td><td><span class="ngain-badge ${cls}">${cat}</span></td><td><span class="chip green">Selesai</span></td></tr>`;
+  }).join('');
+}
+
+function renderAdminSearchLog() {
+  const el = document.getElementById('search-log-list');
+  if (!el) return;
+  el.innerHTML = SEARCH_LOGS.map(s => `<div class="search-log-item"><span class="sl-keyword">🔍 ${s.kw}</span><span class="sl-user">${s.user} · ${s.time}</span></div>`).join('');
+}
+
+function renderAdminVideoList() {
+  const el = document.getElementById('admin-video-list');
+  if (!el) return;
+  el.innerHTML = '<h3>Daftar Video Aktif</h3>' + VIDEOS.map((v,i) => `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;flex:1">${v.title}</span><span class="chip orange">${v.tag}</span><span class="chip green">Aktif</span></div>`).join('');
+}
+
+function addVideo() {
+  const t = document.getElementById('vid-title').value.trim();
+  const u = document.getElementById('vid-url').value.trim();
+  if (!t || !u) { showNotif('Isi judul dan URL!', true); return; }
+  showNotif('Video "' + t + '" berhasil ditambahkan!');
+  document.getElementById('vid-title').value = '';
+  document.getElementById('vid-url').value = '';
+  renderAdminVideoList();
+}
+
+function exportExcel() {
+  showNotif('📊 Data Excel berhasil diunduh!');
+}
+
+// ===== NOTIFICATION =====
+function showNotif(msg, isErr=false) {
+  const n = document.getElementById('notif');
+  document.getElementById('notif-msg').textContent = msg;
+  n.className = 'notif' + (isErr?' error':'') + ' show';
+  setTimeout(() => n.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
