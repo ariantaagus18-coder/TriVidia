@@ -1070,7 +1070,7 @@ input,textarea,select { font-family:inherit; }
                 <label for="login-name">Nama Pengguna</label>
                 <input type="text" id="login-name" placeholder="Contoh: Budi Santoso" autocomplete="off"
                     onkeypress="if(event.key==='Enter') LoginController.login()">
-                <span class="hint">Login sebagai <strong>admin</strong> untuk akses administrator</span>
+                <span class="hint">Login sebagai <strong>admin</strong> untuk akses administrator dengan memasukan kata sandi</span>
             </div>
             <button class="btn btn-primary btn-full" style="padding:13px;font-size:0.95rem;margin-top:4px" onclick="LoginController.login()">
                 <span class="material-symbols-outlined">login</span> Masuk ke Sistem
@@ -1222,11 +1222,12 @@ const MOCK_QUESTIONS = {
 };
 
 const MOCK_USERS = {
-    'budi santoso': { userId:'U001', name:'Budi Santoso', role:'Student' },
-    'siti aminah': { userId:'U002', name:'Siti Aminah', role:'Student' },
-    'agus pratama': { userId:'U003', name:'Agus Pratama', role:'Student' },
-    'diana wati': { userId:'U004', name:'Diana Wati', role:'Student' },
-    'eko saputra': { userId:'U005', name:'Eko Saputra', role:'Student' }
+    'puji artama': { userId:'U001', name:'Puji Artama', role:'Student' },
+    'adi wiranata': { userId:'U002', name:'Adi Wiranata', role:'Student' },
+    'tunas pranata': { userId:'U003', name:'Tunas Pranata', role:'Student' },
+    'amik yanti': { userId:'U004', name:'Amik Yanti', role:'Student' },
+    'gunawan parmata': { userId:'U005', name:'Gunawan Parmata', role:'Student' },
+    'supardita': { userId:'U006', name:'Supardita', role:'Student' }
 };
 
 const MIN_WORDS = 30;
@@ -1247,6 +1248,19 @@ const MockDB = {
     set(userId, k, v) { localStorage.setItem(MockDB.key(userId, k), JSON.stringify(v)); },
     remove(userId, k) { localStorage.removeItem(MockDB.key(userId, k)); }
 };
+
+// Seed mock data for positive trend
+Object.values(MOCK_USERS).forEach((u, i) => {
+    if (!localStorage.getItem(MockDB.key(u.userId, 'profile'))) {
+        const preScore = 50 + (i * 5); // 50, 55, 60...
+        const postScore = 85 + (i * 2); // 85, 87, 89...
+        MockDB.set(u.userId, 'profile', { userId: u.userId, name: u.name, role: 'Student', currentStage: 'Done', progress: 100, createdAt: new Date().toISOString() });
+        MockDB.set(u.userId, 'scores', { 'Pre-Test': preScore, 'Post-Test': postScore });
+        const dummyDiscovery = {};
+        STAGES.forEach(s => { dummyDiscovery[s.id] = { answer: 'Jawaban observasi dan analisis dari siswa untuk tahap ' + s.label, savedAt: new Date().toISOString() }});
+        MockDB.set(u.userId, 'discovery', dummyDiscovery);
+    }
+});
 
 const MockAPI = {
     login(name) {
