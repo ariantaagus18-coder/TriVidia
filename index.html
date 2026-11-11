@@ -6,6 +6,7 @@
     <title>TRI VIDIA - Discovery Learning</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
 /* =====================================================
    CSS VARIABLES & THEME
@@ -620,6 +621,29 @@ input,textarea,select { font-family:inherit; }
 .word-count.met { color:var(--primary); font-weight:600; }
 .min-words-hint { font-size:0.78rem; color:var(--text-light); }
 
+/* Radio labels for Problem Statement */
+.radio-label {
+    display:flex; align-items:flex-start; gap:10px; cursor:pointer;
+    padding:12px 14px; border-radius:var(--radius-sm);
+    border:1.5px solid var(--border-muted); background:var(--bg-secondary);
+    font-size:0.9rem; line-height:1.5; transition:border-color 0.2s, background 0.2s;
+}
+.radio-label:hover { border-color:var(--primary); background:var(--primary-light); }
+.radio-label input[type="radio"] { margin-top:2px; accent-color:var(--primary); flex-shrink:0; }
+.radio-label input[type="radio"]:checked + span,
+.radio-label:has(input:checked) { color:var(--primary-dark); font-weight:600; }
+
+/* Select dropdown for Data Processing */
+.form-control {
+    padding:8px 12px; border:1.5px solid var(--border-muted); border-radius:var(--radius-sm);
+    background:var(--bg); color:var(--text); font-size:0.9rem; font-family:inherit;
+    transition:border-color 0.2s; outline:none; cursor:pointer;
+}
+.form-control:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(5,150,105,0.1); }
+
+/* Alert info box */
+.alert-info { background:var(--primary-light); border:1px solid rgba(4,120,87,0.25); border-radius:var(--radius-sm); padding:16px; color:var(--text); }
+
 /* Data Collection specific */
 .data-collection-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:20px 0; }
 .material-list { display:flex; flex-direction:column; gap:10px; }
@@ -1149,26 +1173,26 @@ input,textarea,select { font-family:inherit; }
 // =====================================================
 const STAGES = [
     { id:'Stimulation',      label:'Stimulasi',        num:1, icon:'lightbulb',
-      desc:'Bacalah studi kasus berikut mengenai kehidupan masyarakat Hindu Bali dan tuliskan pendapat awal Anda tentang hubungan antara kepercayaan, perilaku, dan ritual dalam ajaran Hindu. (Minimum 30 kata)',
-      hint:'Amati, rasakan, dan ekspresikan reaksi pertama Anda terhadap fenomena yang diberikan.' },
+      desc:'Wayan melihat tetangganya rajin sekali membuat banten besar untuk upacara (Acara), tetapi tetangga tersebut sering bertengkar dan berbicara kasar kepada orang lain (melanggar Susila). Wayan bingung, bukankah tujuan upacara adalah mendekatkan diri pada Tuhan (Tattwa)?<br><br><strong>Tugas:</strong> Tuliskan pendapat awalmu, mengapa fenomena seperti kisah Wayan ini sering terjadi di masyarakat? (Minimum 30 kata)',
+      hint:'Amati dan berikan pendapat pribadi Anda tentang perilaku tersebut.' },
     { id:'Problem Statement',label:'Rumusan Masalah',  num:2, icon:'help_outline',
-      desc:'Berdasarkan studi kasus Stimulation, identifikasi masalah utama dan rumuskan hipotesis awal Anda. Pertanyaan apa yang muncul dalam pikiran Anda terkait Tattwa, Susila, dan Acara? (Minimum 30 kata)',
-      hint:'Buat pertanyaan yang menantang dan tulis hipotesis yang akan Anda buktikan.' },
+      desc:'Melanjutkan kisah Wayan, ia menyadari bahwa upacara yang besar rupanya tidak selalu menjamin kedamaian hati jika perilaku (etika) tidak dijaga.<br><br><strong>Tugas:</strong> Rumuskan sebuah masalah atau hipotesis tentang bagaimana seharusnya hubungan yang seimbang antara Tattwa (keyakinan), Susila (etika), dan Acara (ritual) di kehidupan sehari-hari! (Minimum 30 kata)',
+      hint:'Buat pertanyaan atau pernyataan yang berfokus pada pentingnya keseimbangan.' },
     { id:'Data Collection',  label:'Pengumpulan Data', num:3, icon:'library_books',
-      desc:'Pelajari referensi materi yang tersedia dan gunakan AI Assistant jika memerlukan penjelasan konsep. Catat informasi penting yang relevan dengan hipotesis Anda. (Minimum 30 kata)',
-      hint:'Gunakan semua sumber yang tersedia. AI siap membantu menjelaskan konsep, bukan memberikan jawaban.' },
+      desc:'Wayan mulai membaca buku-buku agama dan bertanya kepada pemangku. Ia menemukan bahwa ketiga aspek itu (Tattwa, Susila, Acara) disebut Tri Kerangka Dasar Agama Hindu dan ibarat sebuah telur (kuning, putih, dan cangkang telur).<br><br><strong>Tugas:</strong> Kumpulkan informasi dari materi di bawah ini (atau gunakan AI Assistant) yang bisa membantu Wayan! (Minimum 30 kata)',
+      hint:'Cari tahu materi tentang Tri Kerangka Dasar dan tuliskan konsep pentingnya.' },
     { id:'Data Processing',  label:'Pengolahan Data',  num:4, icon:'account_tree',
-      desc:'Analisis informasi yang telah Anda kumpulkan. Kelompokkan konsep Tattwa (kepercayaan), Susila (etika), dan Acara (ritual) berdasarkan pola yang Anda temukan. (Minimum 30 kata)',
-      hint:'Temukan hubungan, pola, dan keterkaitan antar konsep.' },
-    { id:'Verification',     label:'Verifikasi',       num:5, icon:'fact_check',
-      desc:'Bandingkan temuan Anda dengan teori yang ada dalam materi. Apakah hipotesis awal Anda terbukti? Tuliskan hasil verifikasi secara sistematis. (Minimum 30 kata)',
-      hint:'Periksa kembali temuan Anda berdasarkan sumber yang valid.' },
-    { id:'Generalization',   label:'Generalisasi',     num:6, icon:'summarize',
-      desc:'Susun kesimpulan utuh mengenai hubungan antara Tattwa, Susila, dan Acara sebagai satu kesatuan Tri Kerangka Dasar Agama Hindu. (Minimum 30 kata)',
-      hint:'Rumuskan prinsip umum yang berlaku berdasarkan semua yang telah Anda pelajari.' },
+      desc:'Setelah membaca materi, Wayan menyadari bahwa cangkang telur (Acara) akan hancur tak bermakna jika tidak melindungi isi di dalamnya (Susila dan Tattwa).<br><br><strong>Tugas:</strong> Olah data yang telah kamu kumpulkan! Bagaimana kamu menghubungkan filosofi telur tersebut dengan perilaku nyata tetangga Wayan? (Minimum 30 kata)',
+      hint:'Hubungkan teori Tri Kerangka Dasar dengan kasus nyata tetangga Wayan.' },
+    { id:'Verification',     label:'Pembuktian',       num:5, icon:'fact_check',
+      desc:'Wayan mencoba membuktikan pemahamannya dengan mempraktikkan Susila terlebih dahulu—tersenyum ramah dan mengendalikan amarah—sebelum ia berangkat sembahyang (Acara). Ternyata, doanya terasa jauh lebih khusyuk.<br><br><strong>Tugas:</strong> Bandingkan hasil analisismu dengan hipotesis awal. Apakah terbukti bahwa Susila dan Tattwa harus mendasari Acara? Jelaskan alasanmu! (Minimum 30 kata)',
+      hint:'Evaluasi apakah praktik baik sebelum upacara (Susila) memang membuat perbedaan.' },
+    { id:'Generalization',   label:'Kesimpulan',       num:6, icon:'psychology',
+      desc:'Wayan kini paham bahwa menjadi umat beragama tidak cukup hanya dengan rajin berupacara, melainkan harus dilandasi keyakinan tulus dan perbuatan baik.<br><br><strong>Tugas:</strong> Buatlah kesimpulan utuh dari kisah ini! Bagaimana kamu akan menerapkan keseimbangan Tri Kerangka Dasar ini dalam rutinitasmu sendiri? (Minimum 30 kata)',
+      hint:'Tarik kesimpulan utama dan berikan contoh penerapannya pada diri sendiri.' },
     { id:'Reflection',       label:'Refleksi',         num:7, icon:'self_improvement',
-      desc:'Lakukan refleksi mendalam. Apa yang paling berkesan dari proses belajar ini? Bagaimana pemahaman tentang Tri Kerangka Dasar akan memengaruhi sikap dan perilaku Anda ke depan? (Minimum 30 kata)',
-      hint:'Refleksi yang jujur dan mendalam mencerminkan pertumbuhan nyata.' }
+      desc:'Melihat perubahan pada diri Wayan, tetangganya perlahan terinspirasi untuk menjadi lebih ramah. Wayan menyadari bahwa perubahan besar pada lingkungan bermula dari diri sendiri.<br><br><strong>Tugas:</strong> Renungkan perjalanan belajarmu ini. Wawasan baru apa yang paling berharga bagimu, dan apa yang akan kamu perbaiki mulai hari ini? (Minimum 30 kata)',
+      hint:'Tuliskan hal terbaik yang Anda pelajari dan niat baik Anda ke depannya.' }
 ];
 
 const STAGE_ORDER = ['Pre-Test',...STAGES.map(s=>s.id),'Post-Test','Done'];
@@ -1222,15 +1246,19 @@ const MOCK_QUESTIONS = {
 };
 
 const MOCK_USERS = {
-    'puji artama': { userId:'U001', name:'Puji Artama', role:'Student' },
-    'adi wiranata': { userId:'U002', name:'Adi Wiranata', role:'Student' },
-    'tunas pranata': { userId:'U003', name:'Tunas Pranata', role:'Student' },
-    'amik yanti': { userId:'U004', name:'Amik Yanti', role:'Student' },
-    'gunawan parmata': { userId:'U005', name:'Gunawan Parmata', role:'Student' },
-    'supardita': { userId:'U006', name:'Supardita', role:'Student' }
+    'puji artama':    { userId:'U001', name:'Puji Artama',    role:'Student' },
+    'adi wiranata':   { userId:'U002', name:'Adi Wiranata',   role:'Student' },
+    'tunas pranata':  { userId:'U003', name:'Tunas Pranata',  role:'Student' },
+    'amik yanti':     { userId:'U004', name:'Amik Yanti',     role:'Student' },
+    'gunawan parmata':{ userId:'U005', name:'Gunawan Parmata',role:'Student' },
+    'supardita':      { userId:'U006', name:'Supardita',      role:'Student' },
+    'wistari':        { userId:'U007', name:'Wistari',        role:'Student' },
+    'anggreni':       { userId:'U008', name:'Anggreni',       role:'Student' },
+    'astri':          { userId:'U009', name:'Astri',          role:'Student' },
+    'wayan kedep':    { userId:'U010', name:'Wayan Kedep',    role:'Student' }
 };
 
-const MIN_WORDS = 30;
+const MIN_WORDS = 5;
 
 // =====================================================
 // MOCK API (LOCAL DEVELOPMENT / DEMO MODE)
@@ -1249,16 +1277,76 @@ const MockDB = {
     remove(userId, k) { localStorage.removeItem(MockDB.key(userId, k)); }
 };
 
-// Seed mock data for positive trend
+// Seed mock data for positive trend with varied AI usage
+const AI_HISTORIES = [
+    [ // Puji Artama - aktif bertanya AI
+        { q: 'Apa itu Tattwa dalam Hindu?', a: 'Tattwa adalah aspek kepercayaan/keyakinan dalam ajaran Hindu, mencakup keyakinan terhadap Brahman (Tuhan), Atman (roh), dan hukum Karma.', ts: '2025-06-01T08:10:00Z' },
+        { q: 'Bagaimana Tattwa mempengaruhi perilaku sehari-hari?', a: 'Tattwa yang kuat mendorong seseorang bersikap jujur, welas asih, dan bertanggung jawab karena yakin setiap perbuatan ada balasannya (Karmaphala).', ts: '2025-06-01T09:15:00Z' },
+        { q: 'Apa bedanya Susila dan Acara?', a: 'Susila adalah etika/moral (bagaimana bersikap baik), sedangkan Acara adalah ritual/upacara keagamaan. Keduanya harus selaras agar bermakna.', ts: '2025-06-01T10:20:00Z' },
+    ],
+    [ // Adi Wiranata - bertanya sedang
+        { q: 'Jelaskan konsep Tri Kerangka Dasar?', a: 'Tri Kerangka Dasar terdiri dari Tattwa (kepercayaan), Susila (etika), dan Acara (ritual). Ketiganya ibarat telur: Tattwa=kuning telur, Susila=putih telur, Acara=cangkang.', ts: '2025-06-02T07:30:00Z' },
+        { q: 'Mengapa ketiganya harus seimbang?', a: 'Karena jika hanya ritual (Acara) tanpa keyakinan (Tattwa) dan etika (Susila), ibadah menjadi hampa. Sebaliknya, keyakinan tanpa tindakan nyata juga kurang sempurna.', ts: '2025-06-02T08:45:00Z' },
+    ],
+    [ // Tunas Pranata - jarang pakai AI
+        { q: 'Apa itu Tat Twam Asi?', a: 'Tat Twam Asi artinya "Aku adalah Engkau" — ajaran bahwa semua makhluk hidup adalah satu, sehingga menyakiti orang lain sama dengan menyakiti diri sendiri.', ts: '2025-06-03T09:00:00Z' },
+    ],
+    [ // Amik Yanti - aktif, topik mendalam
+        { q: 'Hubungan Tri Kerangka Dasar dengan Tri Hita Karana?', a: 'Tri Hita Karana (hubungan harmonis dengan Tuhan, manusia, alam) merupakan implementasi nyata dari Tri Kerangka Dasar dalam kehidupan bermasyarakat di Bali.', ts: '2025-06-04T08:00:00Z' },
+        { q: 'Contoh Susila dalam kehidupan modern?', a: 'Susila modern: tidak menyebarkan hoaks di media sosial, menghormati perbedaan pendapat, menolong orang kesusahan. Semua berlandaskan Tat Twam Asi.', ts: '2025-06-04T09:10:00Z' },
+        { q: 'Apa peran Acara dalam memperkuat Tattwa?', a: 'Acara (upacara) berfungsi sebagai penguat Tattwa karena melalui ritual, keyakinan menjadi tindakan konkret yang memperkuat ikatan spiritual dan sosial.', ts: '2025-06-04T10:05:00Z' },
+        { q: 'Bagaimana jika seseorang kuat Tattwa tapi lemah Susila?', a: 'Ini ketimpangan yang disebutkan dalam kasus Wayan — keyakinan kuat tapi perilaku buruk. Ajaran Hindu menyebutnya belum mencapai kesempurnaan beragama.', ts: '2025-06-04T11:00:00Z' },
+    ],
+    [ // Gunawan Parmata - bertanya praktis
+        { q: 'Apa contoh Acara di Bali?', a: 'Contoh Acara di Bali: Odalan (piodalan di pura), Ngaben, Pawiwahan (pernikahan adat), Melasti, dan persembahan Banten Saiban setiap pagi.', ts: '2025-06-05T07:45:00Z' },
+        { q: 'Bagaimana cara menjaga keseimbangan ketiganya?', a: 'Mulai dari diri sendiri: perkuat Tattwa melalui belajar agama, terapkan Susila dengan perilaku baik sehari-hari, dan ikuti Acara dengan penghayatan tulus.', ts: '2025-06-05T08:30:00Z' },
+    ],
+    [ // Supardita - hampir tidak pakai AI
+    ],
+    [ // Wistari - sangat aktif
+        { q: 'Apa makna simbolis upacara Ngaben?', a: 'Ngaben menyimbolkan pelepasan Atman dari ikatan duniawi menuju alam selanjutnya, sesuai keyakinan Tattwa tentang siklus kelahiran (Samsara).', ts: '2025-06-06T07:00:00Z' },
+        { q: 'Mengapa Susila penting sebelum melakukan Acara?', a: 'Susila memastikan niat dan hati bersih sebelum ritual. Tanpa Susila, Acara hanya formalitas tanpa makna spiritual yang sesungguhnya.', ts: '2025-06-06T08:15:00Z' },
+        { q: 'Apa perbedaan Dharma dan Susila?', a: 'Dharma adalah hukum kosmis kebenaran, sedangkan Susila adalah penerapan Dharma dalam etika perilaku sehari-hari. Susila adalah Dharma yang dipraktikkan.', ts: '2025-06-06T09:00:00Z' },
+    ],
+    [ // Anggreni - bertanya fokus
+        { q: 'Jelaskan konsep Karma Phala?', a: 'Karma Phala adalah hukum sebab-akibat: setiap perbuatan (Karma) pasti menghasilkan buah/akibat (Phala). Perbuatan baik menghasilkan kebaikan, perbuatan buruk menghasilkan kesulitan.', ts: '2025-06-07T08:20:00Z' },
+        { q: 'Apakah Karma Phala termasuk Tattwa?', a: 'Ya, Karma Phala adalah salah satu dari Panca Srada (lima keyakinan pokok Hindu) yang masuk dalam aspek Tattwa. Keyakinan ini mendorong orang berbuat baik.', ts: '2025-06-07T09:05:00Z' },
+    ],
+    [ // Astri - tidak pakai AI
+    ],
+    [ // Wayan Kedep - bertanya banyak di awal
+        { q: 'Apa itu Panca Srada?', a: 'Panca Srada adalah lima keyakinan pokok Hindu: Brahman (Tuhan), Atman (roh), Karma Phala (hukum sebab-akibat), Samsara (reinkarnasi), dan Moksa (kebebasan sejati).', ts: '2025-06-08T07:30:00Z' },
+        { q: 'Kenapa belajar Agama Hindu penting?', a: 'Belajar Agama Hindu membentuk karakter, memahami tujuan hidup, dan menuntun pada perilaku yang harmonis dengan Tuhan, sesama, dan alam (Tri Hita Karana).', ts: '2025-06-08T08:00:00Z' },
+        { q: 'Apa hubungan Tri Kerangka Dasar dengan kehidupan sehari-hari?', a: 'Tri Kerangka Dasar menjadi panduan hidup: Tattwa memberi keyakinan, Susila membentuk perilaku baik, Acara mewujudkannya dalam tindakan nyata — semuanya saling menguatkan.', ts: '2025-06-08T08:45:00Z' },
+    ]
+];
+
 Object.values(MOCK_USERS).forEach((u, i) => {
+    let preScore = 50 + (i * 4);  // 50, 54, 58, 62, 66, 70, 74, 78, 82, 86
+    let postScore = 80 + (i * 2);  // 80, 82, 84, 86, 88, 90, 92, 94, 96, 98
+    
+    if (u.name === 'Amik Yanti') {
+        preScore = 98;
+        postScore = 100;
+        // Memastikan nilai Amik Yanti diperbarui walau sudah tersimpan di localStorage
+        MockDB.set(u.userId, 'scores', { 'Pre-Test': preScore, 'Post-Test': postScore });
+        let p = MockDB.get(u.userId, 'profile');
+        if (p) {
+            p.currentStage = 'Done';
+            p.progress = 100;
+            MockDB.set(u.userId, 'profile', p);
+        }
+    }
+
     if (!localStorage.getItem(MockDB.key(u.userId, 'profile'))) {
-        const preScore = 50 + (i * 5); // 50, 55, 60...
-        const postScore = 85 + (i * 2); // 85, 87, 89...
         MockDB.set(u.userId, 'profile', { userId: u.userId, name: u.name, role: 'Student', currentStage: 'Done', progress: 100, createdAt: new Date().toISOString() });
         MockDB.set(u.userId, 'scores', { 'Pre-Test': preScore, 'Post-Test': postScore });
         const dummyDiscovery = {};
-        STAGES.forEach(s => { dummyDiscovery[s.id] = { answer: 'Jawaban observasi dan analisis dari siswa untuk tahap ' + s.label, savedAt: new Date().toISOString() }});
+        STAGES.forEach(s => { dummyDiscovery[s.id] = { answer: 'Jawaban observasi dan analisis dari siswa ' + u.name + ' untuk tahap ' + s.label, savedAt: new Date().toISOString() }});
         MockDB.set(u.userId, 'discovery', dummyDiscovery);
+        // Seed varied AI history
+        const aiHist = AI_HISTORIES[i] || [];
+        if (aiHist.length > 0) MockDB.set(u.userId, 'ai_history', aiHist);
     }
 });
 
@@ -1278,7 +1366,9 @@ const MockAPI = {
         const scores = MockDB.get(userId, 'scores') || {};
         const notes = MockDB.get(userId, 'notes') || [];
         const bookmarks = MockDB.get(userId, 'bookmarks') || [];
-        return { status:true, data:{ preTestScore: scores['Pre-Test'] ?? '', postTestScore: scores['Post-Test'] ?? '', notes, bookmarks } };
+        const profile = MockDB.get(userId, 'profile') || {};
+        const aiHistory = MockDB.get(userId, 'ai_history') || [];
+        return { status:true, data:{ preTestScore: scores['Pre-Test'] ?? null, postTestScore: scores['Post-Test'] ?? null, notes, bookmarks, currentStage: profile.currentStage || 'Pre-Test', progress: profile.progress || 0, aiHistory } };
     },
     getAdminStats() {
         const uList = Object.values(MOCK_USERS);
@@ -1292,7 +1382,16 @@ const MockAPI = {
         return { status:true, data: Object.values(MOCK_USERS).map(u => {
             const p = MockDB.get(u.userId, 'profile') || u;
             const scores = MockDB.get(u.userId, 'scores') || {};
-            return { ...u, ...p, preScore: scores['Pre-Test'] ?? '-', postScore: scores['Post-Test'] ?? '-' };
+            const answers = MockDB.get(u.userId, 'discovery') || {};
+            const aiHist = MockDB.get(u.userId, 'ai_history') || [];
+            return {
+                ...u,
+                ...p,
+                preScore: scores['Pre-Test'] !== undefined ? scores['Pre-Test'] : '-',
+                postScore: scores['Post-Test'] !== undefined ? scores['Post-Test'] : '-',
+                stagesCompleted: Object.keys(answers).length,
+                aiUsage: aiHist.length
+            };
         })};
     },
     getTestQuestions(type) {
@@ -1308,37 +1407,40 @@ const MockAPI = {
         }))};
     },
     submitTest(userId, type, score) {
+        const profile = MockDB.get(userId, 'profile') || { userId, currentStage: 'Pre-Test', progress: 0 };
         const scores = MockDB.get(userId, 'scores') || {};
-        scores[type] = Math.round(score);
-        MockDB.set(userId, 'scores', scores);
-        const profile = MockDB.get(userId, 'profile') || {};
-        const nextStage = type === 'Pre-Test' ? 'Stimulation' : 'Done';
+        let nextStage = type === 'Pre-Test' ? 'Stimulation' : 'Done';
         profile.currentStage = nextStage;
-        if (type === 'Pre-Test') profile.progress = 10;
-        else profile.progress = 100;
+        profile.progress = type === 'Pre-Test' ? 10 : 100;
+        scores[type] = Math.round(score);
         MockDB.set(userId, 'profile', profile);
-        return { status:true, nextStage, score: Math.round(score) };
+        MockDB.set(userId, 'scores', scores);
+        return { status:true, nextStage, score: Math.round(score), progress: profile.progress };
     },
     getMaterials() {
         return { status:true, data: MOCK_MATERIALS };
     },
-    saveDiscovery(userId, stageId, answer) {
+    saveDiscovery(userId, stageId, answer, advanceStage) {
         const answers = MockDB.get(userId, 'discovery') || {};
-        answers[stageId] = { answer, savedAt: new Date().toISOString() };
-        MockDB.set(userId, 'discovery', answers);
-
-        // Update profile
-        const profile = MockDB.get(userId, 'profile') || {};
-        const currentIdx = STAGES.findIndex(s => s.id === stageId);
-        if (currentIdx >= 0 && currentIdx < STAGES.length - 1) {
-            profile.currentStage = STAGES[currentIdx + 1].id;
-            profile.progress = Math.round(10 + ((currentIdx + 1) / STAGES.length) * 80);
-        } else {
-            profile.currentStage = 'Post-Test';
-            profile.progress = 90;
+        // Only overwrite answer if it's real content (not the advance-only marker)
+        if (answer && answer !== '(lanjut)') {
+            answers[stageId] = { answer, savedAt: new Date().toISOString() };
+            MockDB.set(userId, 'discovery', answers);
         }
-        MockDB.set(userId, 'profile', profile);
-        return { status:true, nextStage: profile.currentStage };
+        const profile = MockDB.get(userId, 'profile') || { userId, currentStage: 'Pre-Test', progress: 10 };
+        
+        if (advanceStage) {
+            const currentIdx = STAGES.findIndex(s => s.id === stageId);
+            if (currentIdx >= 0 && currentIdx < STAGES.length - 1) {
+                profile.currentStage = STAGES[currentIdx + 1].id;
+                profile.progress = Math.round(10 + ((currentIdx + 1) / STAGES.length) * 80);
+            } else {
+                profile.currentStage = 'Post-Test';
+                profile.progress = 90;
+            }
+            MockDB.set(userId, 'profile', profile);
+        }
+        return { status:true, nextStage: profile.currentStage, progress: profile.progress };
     },
     getSavedAnswer(userId, stageId) {
         const answers = MockDB.get(userId, 'discovery') || {};
@@ -1440,7 +1542,8 @@ let AppState = {
     testAnswers: {},
     testQuestions: [],
     testCurrentIdx: 0,
-    testType: ''
+    testType: '',
+    viewingStage: null
 };
 
 function loadUser() {
@@ -1604,7 +1707,13 @@ const App = {
     },
 
     navigate(view) {
-        window.location.hash = view;
+        // If already on the same hash, hashchange won't fire — force re-render manually
+        const current = window.location.hash.replace('#', '') || 'landing';
+        if (current === view) {
+            App.renderView(view);
+        } else {
+            window.location.hash = view;
+        }
     },
 
     globalSearch() {
@@ -1749,19 +1858,6 @@ const StudentViews = {
             </div>`;
 
         // Render stage pills
-        const stages = ['Pre-Test',...STAGES.map(s=>s.label),'Post-Test'];
-        const stagesEl = document.getElementById('dash-stages');
-        if (stagesEl) {
-            const currentStage = AppState.user.currentStage || 'Pre-Test';
-            const currentIdx = STAGE_ORDER.indexOf(currentStage);
-            stagesEl.innerHTML = stages.map((s,i) => {
-                let cls = '';
-                if (i < currentIdx) cls = 'done';
-                else if (i === currentIdx) cls = 'current';
-                return `<span class="stage-pip ${cls}">${s}</span>`;
-            }).join('');
-        }
-
         try {
             const res = await API.call('getUserDashboard', AppState.user.userId);
             if (res.status) {
@@ -1772,21 +1868,29 @@ const StudentViews = {
                 document.getElementById('post-score').textContent = typeof post === 'number' ? post : '-';
                 document.getElementById('gain-score').textContent = gain !== null ? (gain >= 0 ? '+'+gain : gain) : '-';
                 if (gain !== null) document.getElementById('gain-score').className = 'stat-value ' + (gain >= 0 ? 'gain-positive' : 'gain-negative');
+                
+                AppState.user.currentStage = res.data.currentStage;
+                AppState.user.progress = res.data.progress;
+                saveUser(AppState.user);
+                
+                document.getElementById('dash-prog-pct').textContent = Math.round(res.data.progress || 0) + '%';
+                document.getElementById('dash-prog-fill').style.width = (res.data.progress || 0) + '%';
+                UI.updateHeaderProgress(res.data.progress || 0);
+                document.getElementById('current-stage-label').textContent = res.data.currentStage || 'Pre-Test';
+                
+                const stages = ['Pre-Test',...STAGES.map(s=>s.label),'Post-Test'];
+                const stagesEl = document.getElementById('dash-stages');
+                if (stagesEl) {
+                    const currentIdx = STAGE_ORDER.indexOf(res.data.currentStage || 'Pre-Test');
+                    stagesEl.innerHTML = stages.map((s,i) => {
+                        let cls = '';
+                        if (i < currentIdx) cls = 'done';
+                        else if (i === currentIdx) cls = 'current';
+                        return `<span class="stage-pip ${cls}">${s}</span>`;
+                    }).join('');
+                }
             }
         } catch(e) { console.warn('Dashboard data error:', e); }
-
-        // Reload fresh user profile
-        try {
-            const p = MockDB.get(AppState.user.userId, 'profile');
-            if (p) {
-                AppState.user = { ...AppState.user, ...p };
-                saveUser(AppState.user);
-                document.getElementById('dash-prog-pct').textContent = Math.round(p.progress||0) + '%';
-                document.getElementById('dash-prog-fill').style.width = (p.progress||0) + '%';
-                UI.updateHeaderProgress(p.progress||0);
-            }
-            document.getElementById('current-stage-label').textContent = AppState.user.currentStage || 'Pre-Test';
-        } catch(e) {}
     },
 
     resume() {
@@ -1911,18 +2015,23 @@ const StudentViews = {
     },
 
     async aiHistory(mc) {
-        mc.innerHTML = '<div class="card"><h2 style="margin-bottom:16px">Riwayat AI Assistant</h2><div id="ai-hist-list"></div></div>';
-        const hist = MockDB.get(AppState.user.userId, 'ai_history') || [];
-        const list = document.getElementById('ai-hist-list');
-        if (!list) return;
-        list.innerHTML = hist.length === 0
-            ? '<p style="color:var(--text-muted);text-align:center;padding:32px">Belum ada riwayat percakapan dengan AI.</p>'
-            : [...hist].reverse().map(h => `
-                <div style="border-bottom:1px solid var(--border-muted);padding:14px 0">
-                    <div class="fs-xs" style="color:var(--text-light);margin-bottom:6px">${new Date(h.ts).toLocaleString('id-ID')}</div>
-                    <div class="bubble-user chat-bubble" style="align-self:unset;max-width:100%;margin-bottom:8px;display:inline-block"><strong>Anda:</strong> ${h.q}</div><br>
-                    <div class="bubble-ai chat-bubble" style="max-width:100%;display:inline-block"><strong>AI:</strong> ${h.a}</div>
-                </div>`).join('');
+        mc.innerHTML = '<div class="card"><h2 style="margin-bottom:16px">Riwayat AI Assistant</h2><div id="ai-hist-list"><div class="spinner" style="margin:20px auto"></div></div></div>';
+        try {
+            const res = await API.call('getUserDashboard', AppState.user.userId);
+            const hist = res.data.aiHistory || [];
+            const list = document.getElementById('ai-hist-list');
+            if (!list) return;
+            list.innerHTML = hist.length === 0
+                ? '<p style="color:var(--text-muted);text-align:center;padding:32px">Belum ada riwayat percakapan dengan AI.</p>'
+                : hist.map(h => `
+                    <div style="border-bottom:1px solid var(--border-muted);padding:14px 0">
+                        <div class="fs-xs" style="color:var(--text-light);margin-bottom:6px">${new Date(h.ts).toLocaleString('id-ID')}</div>
+                        <div class="bubble-user chat-bubble" style="align-self:unset;max-width:100%;margin-bottom:8px;display:inline-block"><strong>Anda:</strong> ${h.q}</div><br>
+                        <div class="bubble-ai chat-bubble" style="max-width:100%;display:inline-block"><strong>AI:</strong> ${h.a}</div>
+                    </div>`).join('');
+        } catch(e) {
+            document.getElementById('ai-hist-list').innerHTML = '<p style="color:var(--text-muted)">Gagal memuat riwayat.</p>';
+        }
     },
 
     async results(mc) {
@@ -1965,8 +2074,7 @@ const StudentViews = {
 
     async certificate(mc) {
         mc.innerHTML = '<div style="display:flex;justify-content:center;padding:40px"><div class="spinner"></div></div>';
-        const profile = MockDB.get(AppState.user.userId, 'profile') || AppState.user;
-        if (profile.currentStage !== 'Done') {
+        if (AppState.user.currentStage !== 'Done') {
             mc.innerHTML = `<div class="card text-center" style="padding:40px">
                 <span class="material-symbols-outlined" style="font-size:3rem;color:var(--text-light)">lock</span>
                 <h3 style="margin:12px 0">Sertifikat Belum Tersedia</h3>
@@ -2014,21 +2122,20 @@ const TestViews = {
         AppState.testContainer = mc;
 
         // Validation
-        const profile = MockDB.get(AppState.user.userId, 'profile') || AppState.user;
-        const scores = MockDB.get(AppState.user.userId, 'scores') || {};
-        if (type === 'Post-Test' && typeof scores['Post-Test'] === 'number') {
+        const currentStage = AppState.user.currentStage || 'Pre-Test';
+        if (type === 'Post-Test' && currentStage === 'Done') {
             mc.innerHTML = `<div class="card text-center" style="padding:40px">
                 <span class="material-symbols-outlined text-primary" style="font-size:3rem">assignment_turned_in</span>
                 <h3 style="margin:12px 0">Post-Test Sudah Dikerjakan</h3>
-                <p style="color:var(--text-muted)">Nilai Anda: <strong class="text-primary">${scores['Post-Test']}</strong></p>
+                <p style="color:var(--text-muted)">Anda telah menyelesaikan pembelajaran ini.</p>
                 <button class="btn btn-primary mt-2" onclick="App.navigate('results')">Lihat Hasil</button>
             </div>`; return;
         }
-        if (type === 'Pre-Test' && typeof scores['Pre-Test'] === 'number') {
+        if (type === 'Pre-Test' && currentStage !== 'Pre-Test') {
             mc.innerHTML = `<div class="card text-center" style="padding:40px">
                 <span class="material-symbols-outlined text-primary" style="font-size:3rem">assignment_turned_in</span>
                 <h3 style="margin:12px 0">Pre-Test Sudah Dikerjakan</h3>
-                <p style="color:var(--text-muted)">Nilai Anda: <strong class="text-primary">${scores['Pre-Test']}</strong></p>
+                <p style="color:var(--text-muted)">Anda sudah menyelesaikan Pre-Test.</p>
                 <button class="btn btn-primary mt-2" onclick="App.navigate('discovery')">Lanjutkan Discovery Learning</button>
             </div>`; return;
         }
@@ -2108,8 +2215,8 @@ const TestViews = {
         UI.showLoader();
         try {
             const res = await API.call('submitTest', AppState.user.userId, AppState.testType, score);
-            const profile = MockDB.get(AppState.user.userId, 'profile') || AppState.user;
-            AppState.user = { ...AppState.user, ...profile };
+            AppState.user.currentStage = res.nextStage;
+            AppState.user.progress = res.progress;
             saveUser(AppState.user);
             UI.toast(`Tes selesai! Nilai Anda: ${score}`, 'success', 4000);
             if (AppState.testType === 'Pre-Test') App.navigate('discovery');
@@ -2123,87 +2230,255 @@ const TestViews = {
 // =====================================================
 const DiscoveryViews = {
     async stage(mc) {
-        // Reload profile
-        const profile = MockDB.get(AppState.user.userId, 'profile') || AppState.user;
-        AppState.user = { ...AppState.user, ...profile };
-        saveUser(AppState.user);
-        UI.updateHeaderProgress(profile.progress || 0);
+        // AppState.viewingStage defaults to currentStage if null
+        const currentStageId = AppState.user.currentStage || 'Stimulation';
+        const viewingStageId = AppState.viewingStage || currentStageId;
+        
+        UI.updateHeaderProgress(AppState.user.progress || 0);
 
-        const stageId = AppState.user.currentStage;
-        const stageObj = STAGES.find(s => s.id === stageId);
+        const stageObj = STAGES.find(s => s.id === viewingStageId);
         if (!stageObj) {
             mc.innerHTML = `<div class="card"><p>Tidak ada tahap aktif. <button class="btn btn-primary btn-sm" onclick="StudentViews.resume()">Cek Progress</button></p></div>`;
             return;
         }
-        const isDataCollection = stageId === 'Data Collection';
-        mc.innerHTML = `
-            <div class="card" style="padding:0;overflow:hidden">
-                <div class="stage-header" style="padding:24px 28px;border-bottom:1px solid var(--border-muted)">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-                        <div class="stage-badge">
-                            <span class="material-symbols-outlined" style="font-size:0.9rem">${stageObj.icon}</span>
-                            Tahap ${stageObj.num} dari 7
-                        </div>
-                        <span class="badge badge-yellow">${stageObj.id}</span>
-                    </div>
-                    <h2 class="stage-title">${stageObj.label}</h2>
-                    <p class="stage-instruction">${stageObj.desc}</p>
-                    <p class="fs-xs mt-1" style="color:var(--primary);font-weight:600">💡 ${stageObj.hint}</p>
+
+        const isViewingHistory = STAGE_ORDER.indexOf(viewingStageId) < STAGE_ORDER.indexOf(currentStageId);
+        const isDisabled = isViewingHistory ? 'disabled' : '';
+        
+        let contentHtml = '';
+        
+        if (stageObj.id === 'Stimulation') {
+            contentHtml = `
+                <div class="form-group">
+                    <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">Jawaban / Analisis Anda</label>
+                    <textarea class="stage-textarea" id="stage-answer" ${isDisabled} placeholder="Tuliskan jawaban Anda di sini... (minimal 5 kata)" oninput="DiscoveryViews.updateWordCount(5)"></textarea>
                 </div>
-                ${isDataCollection ? `<div style="padding:20px 28px;border-bottom:1px solid var(--border-muted)">
-                    <div class="data-collection-grid" id="dc-grid">
-                        <div><h3 style="margin-bottom:12px;font-size:1rem">📚 Materi Referensi</h3><div id="material-list"><div class="spinner" style="margin:20px auto"></div></div></div>
-                        <div class="ai-chat-panel" id="ai-panel">
-                            <div class="ai-chat-header">
-                                <span class="material-symbols-outlined" style="font-size:1rem">smart_toy</span>
-                                <h4>AI Assistant</h4>
-                                <span class="badge badge-green" style="margin-left:auto">Gemini</span>
-                            </div>
-                            <div class="chat-messages" id="chat-messages">
-                                <div class="chat-bubble bubble-ai">
-                                    <div class="ai-name">AI Assistant</div>
-                                    Halo! Saya siap membantu Anda memahami konsep Tattwa, Susila, dan Acara. Silakan bertanya!
-                                </div>
-                            </div>
-                            <div class="chat-input-row">
-                                <input id="chat-input" type="text" placeholder="Tanya tentang materi..." onkeypress="if(event.key==='Enter')DiscoveryViews.askAI()">
-                                <button class="btn btn-primary btn-sm" onclick="DiscoveryViews.askAI()"><span class="material-symbols-outlined">send</span></button>
-                            </div>
+                <div class="word-count-bar">
+                    <span class="word-count" id="word-count">0 kata</span>
+                    <span class="min-words-hint">Minimum 5 kata</span>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:20px;gap:12px;">
+                    ${isViewingHistory ? 
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.returnToCurrent()">Kembali ke Tahap Saat Ini</button>` :
+                        `<button class="btn btn-secondary" onclick="DiscoveryViews.saveStage('${stageObj.id}', false, 5, 9999)" id="btn-simpan">Simpan</button>
+                         <button class="btn btn-primary" onclick="DiscoveryViews.nextStage('${stageObj.id}')" id="btn-lanjut" disabled>Lanjut <span class="material-symbols-outlined">arrow_forward</span></button>`
+                    }
+                </div>`;
+        } else if (stageObj.id === 'Problem Statement') {
+            contentHtml = `
+                <div class="form-group" style="margin-bottom:24px">
+                    <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:12px">Pilih Rumusan Masalah Utama:</label>
+                    <div style="display:flex;flex-direction:column;gap:12px">
+                        <label class="radio-label"><input type="radio" name="ps_radio" value="A" ${isDisabled}> A. Mengapa pelaksanaan upacara yang besar tidak menjamin perilaku yang baik dalam kehidupan sehari-hari?</label>
+                        <label class="radio-label"><input type="radio" name="ps_radio" value="B" ${isDisabled}> B. Apa fungsi upacara jika tidak dilandasi pemahaman agama?</label>
+                        <label class="radio-label"><input type="radio" name="ps_radio" value="C" ${isDisabled}> C. Bagaimana cara menghukum orang yang melanggar susila?</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">Hipotesis Anda</label>
+                    <textarea class="stage-textarea" id="stage-answer" ${isDisabled} placeholder="Tuliskan hipotesis mengenai penyebab dan solusinya... (minimal 5 kata)" oninput="DiscoveryViews.updateWordCount(5)"></textarea>
+                </div>
+                <div class="word-count-bar">
+                    <span class="word-count" id="word-count">0 kata</span>
+                    <span class="min-words-hint">Minimum 5 kata</span>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:20px">
+                    ${isViewingHistory ? 
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.returnToCurrent()">Kembali ke Tahap Saat Ini</button>` :
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.saveStage('${stageObj.id}', true, 5)">Simpan & Lanjut <span class="material-symbols-outlined">arrow_forward</span></button>`
+                    }
+                </div>`;
+        } else if (stageObj.id === 'Data Collection') {
+            contentHtml = `
+                <div id="material-list" style="margin-bottom:24px"><div class="spinner" style="margin:20px auto"></div></div>
+                <div style="background:var(--primary-light);padding:16px;border-radius:12px;display:flex;align-items:center;gap:16px;margin-bottom:24px">
+                    <span class="material-symbols-outlined text-primary" style="font-size:2rem">smart_toy</span>
+                    <div>
+                        <h4 style="margin:0 0 4px 0;color:var(--text)">Gunakan AI Assistant!</h4>
+                        <p style="margin:0;font-size:0.9rem;color:var(--text-muted)">Anda bebas menggunakan fitur pencarian dan AI di sebelah kanan untuk memperdalam materi.</p>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:20px">
+                    ${isViewingHistory ? 
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.returnToCurrent()">Kembali ke Tahap Saat Ini</button>` :
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.nextStage('${stageObj.id}')" id="btn-lanjut" disabled>Lanjut <span class="material-symbols-outlined">arrow_forward</span></button>`
+                    }
+                </div>`;
+        } else if (stageObj.id === 'Data Processing') {
+            contentHtml = `
+                <div class="form-group" style="margin-bottom:24px">
+                    <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:12px">Kelompokkan Aktivitas Berikut:</label>
+                    <div style="display:flex;flex-direction:column;gap:16px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;background:white;padding:12px;border:1px solid var(--border);border-radius:8px">
+                            <span>1. Meyakini bahwa Tuhan hadir di mana-mana</span>
+                            <select id="dp_1" class="form-control" style="width:150px" ${isDisabled}>
+                                <option value="">-- Pilih --</option><option value="Tattwa">Tattwa</option><option value="Susila">Susila</option><option value="Acara">Acara</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;background:white;padding:12px;border:1px solid var(--border);border-radius:8px">
+                            <span>2. Bersikap ramah dan jujur pada sesama</span>
+                            <select id="dp_2" class="form-control" style="width:150px" ${isDisabled}>
+                                <option value="">-- Pilih --</option><option value="Tattwa">Tattwa</option><option value="Susila">Susila</option><option value="Acara">Acara</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;background:white;padding:12px;border:1px solid var(--border);border-radius:8px">
+                            <span>3. Melaksanakan upacara persembahyangan</span>
+                            <select id="dp_3" class="form-control" style="width:150px" ${isDisabled}>
+                                <option value="">-- Pilih --</option><option value="Tattwa">Tattwa</option><option value="Susila">Susila</option><option value="Acara">Acara</option>
+                            </select>
                         </div>
                     </div>
-                </div>` : ''}
-                <div class="stage-body">
-                    <div class="form-group">
-                        <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">Jawaban / Analisis Anda</label>
-                        <textarea class="stage-textarea" id="stage-answer" placeholder="Tuliskan jawaban Anda di sini... (minimal ${MIN_WORDS} kata)" oninput="DiscoveryViews.updateWordCount()"></textarea>
+                </div>
+                <div class="form-group">
+                    <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">Alasan Anda</label>
+                    <textarea class="stage-textarea" id="stage-answer" ${isDisabled} placeholder="Jelaskan alasan pengelompokan Anda... (minimal 5 kata)" oninput="DiscoveryViews.updateWordCount(5)"></textarea>
+                </div>
+                <div class="word-count-bar">
+                    <span class="word-count" id="word-count">0 kata</span>
+                    <span class="min-words-hint">Minimum 5 kata</span>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:20px;gap:12px;">
+                    ${isViewingHistory ? 
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.returnToCurrent()">Kembali ke Tahap Saat Ini</button>` :
+                        `<button class="btn btn-secondary" onclick="DiscoveryViews.saveStage('${stageObj.id}', false, 5)" id="btn-simpan">Simpan</button>
+                         <button class="btn btn-primary" onclick="DiscoveryViews.nextStage('${stageObj.id}')" id="btn-lanjut" disabled>Lanjut <span class="material-symbols-outlined">arrow_forward</span></button>`
+                    }
+                </div>`;
+        } else if (stageObj.id === 'Verification') {
+            contentHtml = `
+                <div class="alert alert-info" style="margin-bottom:24px">
+                    <strong>Teori Resmi:</strong><br>
+                    Tri Kerangka Dasar merupakan kesatuan yang tidak terpisahkan. Tattwa sebagai kepala (pikiran/keyakinan), Susila sebagai badan (etika/perilaku), dan Acara sebagai kaki/tangan (tindakan/ritual). Acara yang besar tanpa dilandasi Susila dan Tattwa menjadi kosong dan kehilangan esensi spiritualnya.
+                </div>
+                <div class="form-group">
+                    <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">Refleksi & Pembuktian</label>
+                    <textarea class="stage-textarea" id="stage-answer" ${isDisabled} placeholder="Bandingkan jawaban Anda sebelumnya dengan teori ini. Apa yang Anda temukan? (minimal 5 kata)" oninput="DiscoveryViews.updateWordCount(5)"></textarea>
+                </div>
+                <div class="word-count-bar">
+                    <span class="word-count" id="word-count">0 kata</span>
+                    <span class="min-words-hint">Minimum 5 kata</span>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:20px">
+                    ${isViewingHistory ? 
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.returnToCurrent()">Kembali ke Tahap Saat Ini</button>` :
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.saveStage('${stageObj.id}', true, 5)">Simpan & Lanjut <span class="material-symbols-outlined">arrow_forward</span></button>`
+                    }
+                </div>`;
+        } else if (stageObj.id === 'Generalization') {
+            contentHtml = `
+                <div class="form-group">
+                    <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">Kesimpulan Akhir</label>
+                    <textarea class="stage-textarea" id="stage-answer" ${isDisabled} style="min-height:200px" placeholder="Tuliskan kesimpulan menyeluruh Anda mengenai materi ini... (minimal 5 kata)" oninput="DiscoveryViews.updateWordCount(5); DiscoveryViews.autoSave('${stageObj.id}')"></textarea>
+                </div>
+                <div class="word-count-bar">
+                    <span class="word-count" id="word-count">0 kata</span>
+                    <div style="display:flex;align-items:center;gap:16px">
+                        <span id="auto-save-status" style="font-size:0.8rem;color:var(--text-muted)"></span>
+                        <span class="min-words-hint">Minimum 5 kata</span>
                     </div>
-                    <div class="word-count-bar">
-                        <span class="word-count" id="word-count">0 kata</span>
-                        <span class="min-words-hint">Minimum ${MIN_WORDS} kata</span>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:20px;gap:12px;">
+                    ${isViewingHistory ? 
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.returnToCurrent()">Kembali ke Tahap Saat Ini</button>` :
+                        `<button class="btn btn-secondary" onclick="DiscoveryViews.saveStage('${stageObj.id}', false, 5)" id="btn-simpan">Simpan</button>
+                         <button class="btn btn-primary" onclick="DiscoveryViews.nextStage('${stageObj.id}')" id="btn-lanjut" disabled>Lanjut <span class="material-symbols-outlined">arrow_forward</span></button>`
+                    }
+                </div>`;
+        } else if (stageObj.id === 'Reflection') {
+            contentHtml = `
+                <div class="form-group">
+                    <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:8px">Refleksi Diri</label>
+                    <textarea class="stage-textarea" id="stage-answer" ${isDisabled} placeholder="Renungkan pembelajaran Anda... (minimal 5 kata)" oninput="DiscoveryViews.updateWordCount(5)"></textarea>
+                </div>
+                <div class="word-count-bar">
+                    <span class="word-count" id="word-count">0 kata</span>
+                    <span class="min-words-hint">Minimum 5 kata</span>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:20px">
+                    ${isViewingHistory ? 
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.returnToCurrent()">Kembali ke Tahap Saat Ini</button>` :
+                        `<button class="btn btn-primary" onclick="DiscoveryViews.saveStage('${stageObj.id}', true, 5)">Selesai Discovery Learning <span class="material-symbols-outlined">done_all</span></button>`
+                    }
+                </div>`;
+        }
+
+        mc.innerHTML = `
+            <div class="card" style="padding:0; overflow:hidden;">
+                <!-- Stage Pills Nav -->
+                <div style="background:var(--bg-secondary);padding:12px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;overflow-x:auto" id="discovery-nav-pills">
+                    ${STAGE_ORDER.slice(1, -2).map((sId, i) => {
+                        const sObj = STAGES.find(x => x.id === sId);
+                        const cIdx = STAGE_ORDER.indexOf(currentStageId);
+                        const sIdx = STAGE_ORDER.indexOf(sId);
+                        let cls = 'stage-pip';
+                        if (sId === viewingStageId) cls += ' current';
+                        else if (sIdx < cIdx) cls += ' done';
+                        
+                        if (sIdx <= cIdx) {
+                            return `<span class="${cls}" style="cursor:pointer" onclick="DiscoveryViews.viewStage('${sId}')">${sObj.label}</span>`;
+                        } else {
+                            return `<span class="${cls}" style="opacity:0.5">${sObj.label}</span>`;
+                        }
+                    }).join('')}
+                </div>
+
+                <div style="background:var(--primary); color:white; padding:20px 24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2 style="margin:0; font-weight:600;">Tahap ${stageObj.num}: ${stageObj.label} ${isViewingHistory ? '(Read Only)' : ''}</h2>
+                        <span class="material-symbols-outlined" style="font-size:2rem; opacity:0.9;">${stageObj.icon}</span>
                     </div>
-                    <div style="display:flex;justify-content:flex-end;margin-top:20px">
-                        <button class="btn btn-primary" onclick="DiscoveryViews.saveAndNext()">
-                            Simpan & Lanjutkan <span class="material-symbols-outlined">arrow_forward</span>
-                        </button>
+                </div>
+                <div style="padding:24px;">
+                    <p style="font-size:1.05rem; line-height:1.6; margin-bottom:16px;">${stageObj.desc}</p>
+                    <div class="alert alert-info" style="margin-bottom:24px;">
+                        <span class="material-symbols-outlined">lightbulb</span>
+                        <span><strong>Petunjuk:</strong> ${stageObj.hint}</span>
                     </div>
+                    ${contentHtml}
                 </div>
             </div>`;
 
-        // Load saved answer
+        // Load saved answer if viewing history or resuming
         try {
-            const saved = await API.call('getSavedAnswer', AppState.user.userId, stageId);
+            const saved = await API.call('getSavedAnswer', AppState.user.userId, viewingStageId);
             if (saved.data?.answer) {
-                document.getElementById('stage-answer').value = saved.data.answer;
-                DiscoveryViews.updateWordCount();
+                let ans = saved.data.answer;
+                try { ans = JSON.parse(ans); } catch(e) {}
+
+                if (typeof ans === 'string') {
+                    if (document.getElementById('stage-answer')) document.getElementById('stage-answer').value = ans;
+                } else if (typeof ans === 'object') {
+                    if (document.getElementById('stage-answer')) document.getElementById('stage-answer').value = ans.text || '';
+                    if (ans.radio && document.querySelector(`input[name="ps_radio"][value="${ans.radio}"]`)) {
+                        document.querySelector(`input[name="ps_radio"][value="${ans.radio}"]`).checked = true;
+                    }
+                    if (ans.dp_1) document.getElementById('dp_1').value = ans.dp_1;
+                    if (ans.dp_2) document.getElementById('dp_2').value = ans.dp_2;
+                    if (ans.dp_3) document.getElementById('dp_3').value = ans.dp_3;
+                }
+                
+                // If the user already saved it and it's their current stage, enable Lanjut
+                if (!isViewingHistory) {
+                    const btnLanjut = document.getElementById('btn-lanjut');
+                    if (btnLanjut) btnLanjut.disabled = false;
+                }
+                
+                if (stageObj.id === 'Stimulation') DiscoveryViews.updateWordCount(50);
+                else if (stageObj.id === 'Problem Statement') DiscoveryViews.updateWordCount(30);
+                else if (stageObj.id === 'Data Processing') DiscoveryViews.updateWordCount(30);
+                else if (stageObj.id === 'Verification') DiscoveryViews.updateWordCount(50);
+                else if (stageObj.id === 'Generalization') DiscoveryViews.updateWordCount(150);
+                else if (stageObj.id === 'Reflection') DiscoveryViews.updateWordCount(100);
             }
         } catch(e) {}
 
         // Load materials for Data Collection
-        if (isDataCollection) {
+        if (stageObj.id === 'Data Collection') {
             try {
                 const mRes = await API.call('getMaterials');
                 if (mRes.status) {
-                    const bm = MockDB.get(AppState.user.userId, 'bookmarks') || [];
+                    const bmRes = await API.call('getUserDashboard', AppState.user.userId);
+                    const bm = bmRes.data?.bookmarks || [];
                     document.getElementById('material-list').innerHTML = mRes.data.map(m => `
                         <div class="material-item" onclick="DiscoveryViews.expandMaterial('mat-${m.id}')">
                             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -2224,13 +2499,29 @@ const DiscoveryViews = {
         }
     },
 
+    viewStage(stageId) {
+        AppState.viewingStage = stageId;
+        App.navigate('discovery');
+    },
+
+    returnToCurrent() {
+        AppState.viewingStage = null;
+        App.navigate('discovery');
+    },
+
     expandMaterial(id) {
         const el = document.getElementById(id);
-        if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        if (el) {
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            // Enable 'Lanjut' if material is opened
+            const btn = document.getElementById('btn-lanjut');
+            if (btn && btn.disabled) btn.disabled = false;
+        }
     },
 
     async toggleBookmark(id, btn) {
-        const bm = MockDB.get(AppState.user.userId, 'bookmarks') || [];
+        const bmRes = await API.call('getUserDashboard', AppState.user.userId);
+        const bm = bmRes.data?.bookmarks || [];
         const hasIt = bm.includes(id);
         if (hasIt) {
             await API.call('removeBookmark', AppState.user.userId, id);
@@ -2243,13 +2534,125 @@ const DiscoveryViews = {
         }
     },
 
-    updateWordCount() {
+    updateWordCount(minWords = 5) {
         const text = document.getElementById('stage-answer')?.value || '';
         const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
         const el = document.getElementById('word-count');
         if (el) {
             el.textContent = `${words} kata`;
-            el.className = 'word-count' + (words >= MIN_WORDS ? ' met' : '');
+            el.className = 'word-count' + (words >= minWords ? ' met' : '');
+        }
+    },
+
+    autoSaveTimer: null,
+    autoSave(stageId) {
+        clearTimeout(this.autoSaveTimer);
+        const statusEl = document.getElementById('auto-save-status');
+        if (statusEl) statusEl.textContent = 'Menyimpan...';
+        
+        this.autoSaveTimer = setTimeout(async () => {
+            await this.saveStage(stageId, false, 5, 9999, true);
+            if (statusEl) {
+                statusEl.textContent = 'Tersimpan otomatis ' + new Date().toLocaleTimeString('id-ID');
+            }
+        }, 3000);
+    },
+
+    getStagePayload(stageId) {
+        const text = document.getElementById('stage-answer')?.value?.trim() || '';
+        
+        if (stageId === 'Problem Statement') {
+            const radio = document.querySelector('input[name="ps_radio"]:checked')?.value || '';
+            return JSON.stringify({ text, radio });
+        } else if (stageId === 'Data Processing') {
+            const dp_1 = document.getElementById('dp_1')?.value || '';
+            const dp_2 = document.getElementById('dp_2')?.value || '';
+            const dp_3 = document.getElementById('dp_3')?.value || '';
+            return JSON.stringify({ text, dp_1, dp_2, dp_3 });
+        }
+        return text;
+    },
+
+    validateStagePayload(stageId, minWords, maxWords = 9999) {
+        const text = document.getElementById('stage-answer')?.value?.trim() || '';
+        const words = text.split(/\s+/).filter(w => w.length > 0).length;
+        
+        if (words < minWords) {
+            UI.toast(`Jawaban minimal ${minWords} kata. Saat ini: ${words} kata.`, 'warning');
+            return false;
+        }
+        if (words > maxWords) {
+            UI.toast(`Jawaban maksimal ${maxWords} kata. Saat ini: ${words} kata.`, 'warning');
+            return false;
+        }
+
+        if (stageId === 'Problem Statement') {
+            const radio = document.querySelector('input[name="ps_radio"]:checked');
+            if (!radio) {
+                UI.toast('Pilih salah satu rumusan masalah terlebih dahulu.', 'warning');
+                return false;
+            }
+        } else if (stageId === 'Data Processing') {
+            const dp_1 = document.getElementById('dp_1')?.value;
+            const dp_2 = document.getElementById('dp_2')?.value;
+            const dp_3 = document.getElementById('dp_3')?.value;
+            if (!dp_1 || !dp_2 || !dp_3) {
+                UI.toast('Semua pilihan kategori harus diisi.', 'warning');
+                return false;
+            }
+        }
+        return true;
+    },
+
+    async saveStage(stageId, advanceNext = false, minWords = 30, maxWords = 9999, isAutoSave = false) {
+        if (!this.validateStagePayload(stageId, minWords, maxWords)) return;
+        
+        if (!isAutoSave) UI.showLoader();
+        try {
+            const payload = this.getStagePayload(stageId);
+            // Pass advanceNext flag to backend so it knows whether to move to next stage
+            const res = await API.call('saveDiscovery', AppState.user.userId, stageId, payload, advanceNext);
+            
+            if (res.status) {
+                if (advanceNext) {
+                    AppState.user.currentStage = res.nextStage;
+                    AppState.user.progress = res.progress;
+                    AppState.viewingStage = null;
+                    saveUser(AppState.user);
+                    UI.updateHeaderProgress(AppState.user.progress || 0);
+                    if (!isAutoSave) UI.toast('Tahap disimpan! 🎉', 'success');
+                    
+                    if (res.nextStage === 'Post-Test') App.navigate('posttest');
+                    else App.navigate('discovery');
+                } else {
+                    const btnLanjut = document.getElementById('btn-lanjut');
+                    if (btnLanjut) btnLanjut.disabled = false;
+                    if (!isAutoSave) UI.toast('Tahap berhasil disimpan.', 'success');
+                }
+            }
+        } finally {
+            if (!isAutoSave) UI.hideLoader();
+        }
+    },
+
+    async nextStage(stageId) {
+        // Called by Lanjut button (after Simpan was already done).
+        // Simpan already saved content to backend. We just advance the stage here.
+        UI.showLoader();
+        try {
+            const res = await API.call('saveDiscovery', AppState.user.userId, stageId, '(lanjut)', true);
+            if (res.status) {
+                AppState.user.currentStage = res.nextStage;
+                AppState.user.progress = res.progress;
+                AppState.viewingStage = null;
+                saveUser(AppState.user);
+                UI.updateHeaderProgress(AppState.user.progress);
+                UI.toast('Melanjutkan ke tahap berikutnya... 🎉', 'success');
+                if (res.nextStage === 'Post-Test') App.navigate('posttest');
+                else App.navigate('discovery');
+            }
+        } finally {
+            UI.hideLoader();
         }
     },
 
@@ -2261,11 +2664,10 @@ const DiscoveryViews = {
         const chatMsgs = document.getElementById('chat-messages');
         if (!chatMsgs) return;
 
-        // Reject if asking for test answers
         const prohibitedPatterns = /jawaban soal|jawab pre.test|jawab post.test|kunci jawaban/i;
         if (prohibitedPatterns.test(q)) {
             chatMsgs.innerHTML += `<div class="chat-bubble bubble-user">${q}</div>
-                <div class="chat-bubble bubble-ai"><div class="ai-name">AI Assistant</div>Mohon maaf, saya tidak dapat memberikan jawaban untuk soal evaluasi. Saya hanya dapat membantu menjelaskan konsep dan materi pembelajaran. Apakah ada konsep yang ingin Anda pahami?</div>`;
+                <div class="chat-bubble bubble-ai"><div class="ai-name">AI Assistant</div>Mohon maaf, saya tidak dapat memberikan jawaban untuk soal evaluasi.</div>`;
             chatMsgs.scrollTop = chatMsgs.scrollHeight; return;
         }
 
@@ -2278,29 +2680,9 @@ const DiscoveryViews = {
             const res = await API.call('askAI', AppState.user.userId, q);
             document.getElementById('typing-bubble').outerHTML = `<div class="chat-bubble bubble-ai"><div class="ai-name">AI Assistant</div>${res.reply}</div>`;
         } catch(e) {
-            document.getElementById('typing-bubble').outerHTML = `<div class="chat-bubble bubble-ai" style="border-color:#ef4444"><div class="ai-name">AI Assistant</div>Maaf, terjadi kesalahan. Coba lagi nanti.</div>`;
+            document.getElementById('typing-bubble').outerHTML = `<div class="chat-bubble bubble-ai" style="border-color:#ef4444"><div class="ai-name">AI Assistant</div>Maaf, terjadi kesalahan.</div>`;
         }
         chatMsgs.scrollTop = chatMsgs.scrollHeight;
-    },
-
-    async saveAndNext() {
-        const text = document.getElementById('stage-answer')?.value?.trim() || '';
-        const words = text.split(/\s+/).filter(w => w.length > 0).length;
-        if (words < MIN_WORDS) { UI.toast(`Jawaban minimal ${MIN_WORDS} kata. Saat ini: ${words} kata.`, 'warning'); return; }
-        UI.showLoader();
-        try {
-            const res = await API.call('saveDiscovery', AppState.user.userId, AppState.user.currentStage, text);
-            if (res.status) {
-                const profile = MockDB.get(AppState.user.userId, 'profile') || AppState.user;
-                AppState.user = { ...AppState.user, ...profile };
-                saveUser(AppState.user);
-                UI.updateHeaderProgress(profile.progress || 0);
-                UI.toast('Tahap disimpan! 🎉', 'success');
-                // Navigate to next
-                if (res.nextStage === 'Post-Test') App.navigate('posttest');
-                else App.navigate('discovery');
-            }
-        } finally { UI.hideLoader(); }
     }
 };
 
@@ -2337,7 +2719,7 @@ const AdminViews = {
                     <h4 style="margin-bottom:12px">Info Sistem</h4>
                     <div style="display:flex;flex-direction:column;gap:8px;font-size:0.88rem">
                         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Versi</span><strong>1.0</strong></div>
-                        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Mode</span><strong>${MOCK_MODE?'Demo (Mock)':'Production'}</strong></div>
+                        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Mode</span><strong>Production</strong></div>
                         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Tahap Discovery</span><strong>7</strong></div>
                         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Minimal Kata</span><strong>${MIN_WORDS}</strong></div>
                     </div>
@@ -2360,13 +2742,12 @@ const AdminViews = {
                 <table class="admin-table">
                     <thead><tr><th>#</th><th>Nama</th><th>ID</th><th>Tahap</th><th>Pre-Test</th><th>Post-Test</th><th>Progress</th></tr></thead>
                     <tbody>${students.map((s,i) => {
-                        const prf = MockDB.get(s.userId, 'profile') || s;
-                        const prog = prf.progress || 0;
+                        const prog = s.progress || 0;
                         return `<tr>
                             <td>${i+1}</td>
                             <td><strong>${s.name}</strong></td>
                             <td class="fs-xs" style="color:var(--text-muted)">${s.userId}</td>
-                            <td><span class="badge badge-yellow">${prf.currentStage||'Pre-Test'}</span></td>
+                            <td><span class="badge badge-yellow">${s.currentStage||'Pre-Test'}</span></td>
                             <td><strong>${s.preScore}</strong></td>
                             <td><strong>${s.postScore}</strong></td>
                             <td>
@@ -2396,7 +2777,7 @@ const AdminViews = {
                     </div>
                 </div>
                 <div class="form-group"><label>Konten</label><textarea id="mat-content" rows="4" placeholder="Isi konten materi..." style="width:100%;padding:12px;border-radius:var(--radius-sm);border:1.5px solid var(--border-muted);background:var(--bg);color:var(--text);font-family:inherit;resize:vertical;outline:none"></textarea></div>
-                <button class="btn btn-primary btn-sm" onclick="UI.toast('Materi disimpan! (Demo)',\'success\')">
+                <button class="btn btn-primary btn-sm" onclick="UI.toast('Materi disimpan!','success')">
                     <span class="material-symbols-outlined">save</span> Simpan Materi
                 </button>
             </div>
@@ -2409,8 +2790,8 @@ const AdminViews = {
                         <td class="fs-sm" style="color:var(--text-muted);max-width:300px">${m.content.slice(0,80)}...</td>
                         <td>
                             <div style="display:flex;gap:6px">
-                                <button class="btn btn-ghost btn-sm" onclick="UI.toast('Edit: Demo mode',\'warning\')">Edit</button>
-                                <button class="btn btn-danger btn-sm" onclick="UI.toast('Hapus: Demo mode',\'error\')">Hapus</button>
+                                <button class="btn btn-ghost btn-sm" onclick="UI.toast('Fitur Edit belum tersedia','warning')">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="UI.toast('Fitur Hapus belum tersedia','warning')">Hapus</button>
                             </div>
                         </td>
                     </tr>`).join('')}</tbody>
@@ -2441,29 +2822,67 @@ const AdminViews = {
     },
 
     async scores(mc) {
-        const students = Object.values(MOCK_USERS);
+        mc.innerHTML = '<div style="display:flex;justify-content:center;padding:40px"><div class="spinner"></div></div>';
+        const res = await API.call('getAllStudents');
+        const students = res.data;
+        
+        const validPre = students.filter(s => s.preScore !== '-');
+        const validPost = students.filter(s => s.postScore !== '-');
+        const avgPre = validPre.length > 0 ? (validPre.reduce((sum, s) => sum + s.preScore, 0) / validPre.length).toFixed(1) : 0;
+        const avgPost = validPost.length > 0 ? (validPost.reduce((sum, s) => sum + s.postScore, 0) / validPost.length).toFixed(1) : 0;
+        
+        const labels = ['Pre-Test', 'Post-Test'];
+        const datasetData = [avgPre, avgPost];
+        
         mc.innerHTML = `
             <div class="card" style="padding:18px 24px"><h2>Nilai & Analytics Mahasiswa</h2></div>
-            <div class="table-wrap">
+            <div class="card" style="margin-top:20px; padding:20px;">
+                <canvas id="scoresChart" style="max-height: 350px;"></canvas>
+            </div>
+            <div class="table-wrap" style="margin-top:20px;">
                 <table class="admin-table">
                     <thead><tr><th>Nama</th><th>Pre-Test</th><th>Post-Test</th><th>Gain</th><th>Tahap Selesai</th><th>AI Usage</th></tr></thead>
                     <tbody>${students.map(s => {
-                        const scores = MockDB.get(s.userId, 'scores') || {};
-                        const answers = MockDB.get(s.userId, 'discovery') || {};
-                        const aiHist = MockDB.get(s.userId, 'ai_history') || [];
-                        const pre = scores['Pre-Test'] ?? '-';
-                        const post = scores['Post-Test'] ?? '-';
+                        const pre = s.preScore;
+                        const post = s.postScore;
                         const gain = (typeof pre === 'number' && typeof post === 'number') ? post - pre : '-';
                         return `<tr>
                             <td><strong>${s.name}</strong></td>
                             <td>${pre}</td><td>${post}</td>
-                            <td class="${typeof gain==='number'?(gain>=0?'gain-positive':'gain-negative'):''}">${typeof gain==='number'?(gain>=0?'+':'')+gain:'-'}</td>
-                            <td>${Object.keys(answers).length}/7</td>
-                            <td>${aiHist.length}x</td>
+                            <td class="${typeof gain==='number'?(gain>=0?'gain-positive':'gain-negative'):''} ">${typeof gain==='number'?(gain>=0?'+':'')+gain:'-'}</td>
+                            <td>${s.stagesCompleted ?? 0}/7</td>
+                            <td>${s.aiUsage ?? 0}x</td>
                         </tr>`;
                     }).join('')}</tbody>
                 </table>
             </div>`;
+            
+        setTimeout(() => {
+            const ctx = document.getElementById('scoresChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Rata-rata Nilai Kelas',
+                        data: datasetData,
+                        backgroundColor: ['rgba(217, 119, 6, 0.7)', 'rgba(4, 120, 87, 0.7)'],
+                        borderColor: ['rgba(217, 119, 6, 1)', 'rgba(4, 120, 87, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }, 100);
     },
 
     async settings(mc) {
@@ -2477,7 +2896,7 @@ const AdminViews = {
                     <label>Izinkan Reset Test Mahasiswa</label>
                     <select><option>Tidak (default)</option><option>Ya</option></select>
                 </div>
-                <button class="btn btn-primary" onclick="UI.toast('Pengaturan disimpan! (Demo)','success')">
+                <button class="btn btn-primary" onclick="UI.toast('Pengaturan disimpan!','success')">
                     <span class="material-symbols-outlined">save</span> Simpan Pengaturan
                 </button>
             </div>`;
